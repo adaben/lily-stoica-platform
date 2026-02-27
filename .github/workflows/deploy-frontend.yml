@@ -1,0 +1,87 @@
+# Deploy frontend to production VPS via private Docker registry.
+# Triggered on push to main when frontend files change.
+
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "vite.config.ts"
+      - "tailwind.config.ts"
+      - "Dockerfile"
+      - "nginx.conf"
+      - ".github/workflows/deploy-frontend.yml"
+
+env:
+  REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+  IMAGE_NAME: lily-frontend
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER }}
+  REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure Docker for insecure registry
+        run: |
+          REGISTRY_HOST="${{ secrets.REGISTRY_URL }}"
+          echo "Configuring Docker for insecure registry: $REGISTRY_HOST"
+          sudo tee /etc/docker/daemon.json > /dev/null <<EOF
+          {
+            "insecure-registries": ["$REGISTRY_HOST"]
+          }
+          EOF
+          sudo systemctl restart docker
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=https://lily.perennix.io/api \
+            -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.IMAGE_NAME }}:latest
+
+      - name: Login to private registry
+        run: |
+          echo "${{ env.REGISTRY_PASSWORD }}" | docker login ${{ env.REGISTRY_URL }} -u "${{ env.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Push to private registry
+        run: |
+          docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest
+          docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/lily-stoica-platform
+            git pull origin main || true
+            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login localhost:5000 -u "${{ secrets.REGISTRY_USER }}" --password-stdin
+            docker pull localhost:5000/lily-frontend:latest
+            docker compose -f docker-compose.prod.yml up -d frontend
+            docker image prune -f
+            echo "Lily frontend deployed at $(date)"
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Frontend deployment successful!"
+          else
+            echo "Frontend deployment failed!"
+          fi

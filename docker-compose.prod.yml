@@ -1,0 +1,79 @@
+# Production docker-compose for LiLy Stoica platform
+# Deployed alongside SNF on the same VPS, different subdomain.
+# Nginx Proxy Manager (from SNF stack) handles SSL/routing externally.
+# NPM proxies lily.perennix.io → localhost:8091 (frontend container).
+# Frontend nginx proxies /api/* → backend:8000 (internal Docker network).
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: lily_db
+    restart: unless-stopped
+    volumes:
+      - lily_pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME:-lily_db}
+      POSTGRES_USER: ${DB_USER:-lily_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-lily_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lily_net
+
+  backend:
+    image: ${REGISTRY:-localhost:5000}/lily-backend:latest
+    container_name: lily_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - lily_media:/app/media
+      - lily_logs:/app/logs
+    environment:
+      DJANGO_ENV: prod
+      DJANGO_DEBUG: "False"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      DB_NAME: ${DB_NAME:-lily_db}
+      DB_USER: ${DB_USER:-lily_user}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      DB_HOST: db
+      DB_PORT: "5432"
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-lily.perennix.io,lilystoica.com,www.lilystoica.com,localhost,127.0.0.1,lily_backend}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://lily.perennix.io,https://lilystoica.com}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://lily.perennix.io,https://lilystoica.com}
+      FRONTEND_URL: ${FRONTEND_URL:-https://lily.perennix.io}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import requests; requests.get('http://localhost:8000/api/health/', timeout=5)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - lily_net
+
+  frontend:
+    image: ${REGISTRY:-localhost:5000}/lily-frontend:latest
+    container_name: lily_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8091}:80"
+    networks:
+      - lily_net
+
+volumes:
+  lily_pgdata:
+  lily_media:
+  lily_logs:
+
+networks:
+  lily_net:
+    name: lily_network
+    driver: bridge
+  lily_logs:

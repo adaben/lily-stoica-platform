@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+backend/venv/
+
+# Build output
+dist/
+
+# Environment files
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+
+# SQLite (dev only)
+backend/db.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+backend/logs/*.log
+
+# Media uploads (dev)
+backend/media/
+
+# Static collected
+backend/staticfiles/
+
+# Misc
+*.bak
+*.tmp

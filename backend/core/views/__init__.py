@@ -1,0 +1,12 @@
+from .health import *  # noqa
+from .auth import *  # noqa
+from .bookings import *  # noqa
+from .testimonials import *  # noqa
+from .blog import *  # noqa
+from .events import *  # noqa
+from .lead_magnet import *  # noqa
+from .contact import *  # noqa
+from .ai import *  # noqa
+from .video import *  # noqa
+from .settings import *  # noqa
+from .resources import *  # noqa
