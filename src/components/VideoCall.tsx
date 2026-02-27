@@ -142,7 +142,7 @@ const VideoCall = ({ bookingId, onClose }: VideoCallProps) => {
   const sendSignal = useCallback(async (type: string, payload: unknown) => {
     if (!roomId) return;
     try {
-      await apiSignalSend(roomId, { type, payload });
+      await apiSignalSend(roomId, { type, payload: JSON.stringify(payload) });
     } catch (err) {
       console.error("[VideoCall] signal send error:", err);
     }
