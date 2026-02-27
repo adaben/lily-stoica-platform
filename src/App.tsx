@@ -1,4 +1,4 @@
-import { Toaster } from "sonner";
+﻿import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -27,6 +27,7 @@ import ResourceDetail from "./pages/ResourceDetail";
 import Profile from "./pages/Profile";
 import Progress from "./pages/Progress";
 import NotFound from "./pages/NotFound";
+import Showcase from "./pages/Showcase";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +94,7 @@ const App = () => (
               />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/showcase" element={<Showcase />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
@@ -103,3 +105,4 @@ const App = () => (
 );
 
 export default App;
+

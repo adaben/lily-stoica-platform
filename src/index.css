@@ -93,3 +93,12 @@ html {
 ::selection {
   background-color: hsl(152 32% 38% / 0.15);
 }
+
+/* Showcase mode  hide header/footer when page is embedded as iframe */
+.showcase-mode header,
+.showcase-mode footer,
+.showcase-mode .site-header,
+.showcase-mode .site-footer,
+.showcase-mode [data-showcase-hide] {
+  display: none !important;
+}
