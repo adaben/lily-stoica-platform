@@ -20,31 +20,26 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Configure Docker for insecure registry
         run: |
           REGISTRY_HOST="${{ secrets.REGISTRY_URL }}"
-          if [ -z "$REGISTRY_HOST" ]; then
-            echo "::error::REGISTRY_URL secret is not set!"
-            exit 1
-          fi
+          echo "Configuring Docker for insecure registry: $REGISTRY_HOST"
           sudo tee /etc/docker/daemon.json > /dev/null <<EOF
           {
             "insecure-registries": ["$REGISTRY_HOST"]
           }
           EOF
           sudo systemctl restart docker
-          sleep 3
+          echo "Docker configured for insecure registry: $REGISTRY_HOST"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker
-
-      - name: Build backend image
+      - name: Build Docker image
         run: |
           docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} ./backend
           docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.IMAGE_NAME }}:latest
@@ -52,6 +47,7 @@ jobs:
       - name: Login to private registry
         run: |
           echo "${{ env.REGISTRY_PASSWORD }}" | docker login ${{ env.REGISTRY_URL }} -u "${{ env.REGISTRY_USERNAME }}" --password-stdin
+          echo "Logged in to registry"
 
       - name: Push to private registry
         run: |
@@ -59,6 +55,7 @@ jobs:
           docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          echo "Images pushed to registry"
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
@@ -68,11 +65,20 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /home/${{ secrets.VPS_USER }}/lily-stoica-platform
+
+            # Pull latest config files (docker-compose, etc.)
             git pull origin main || true
-            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login localhost:5000 -u "${{ secrets.REGISTRY_USER }}" --password-stdin
+
+            # Login to local registry and pull new image
+            echo "${{ env.REGISTRY_PASSWORD }}" | docker login localhost:5000 -u "${{ env.REGISTRY_USERNAME }}" --password-stdin
             docker pull localhost:5000/lily-backend:latest
+
+            # Restart backend
             docker compose -f docker-compose.prod.yml up -d backend
+
+            # Cleanup old images
             docker image prune -f
+
             echo "Lily backend deployed at $(date)"
 
       - name: Notify deployment status
