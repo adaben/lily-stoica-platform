@@ -7,6 +7,7 @@ from .models import (
     User, BookingSlot, Booking, Testimonial, BlogPost, Event,
     LeadMagnetEntry, ContactMessage, AIUsageLog, VideoRoomEvent,
     VideoSignal, SystemConfiguration, ResourceCategory, Resource,
+    Goal, SessionNote,
 )
 
 
@@ -111,3 +112,16 @@ class ResourceAdmin(ImportExportModelAdmin):
     list_filter = ("resource_type", "is_published", "is_premium", "category")
     search_fields = ("title", "description")
     prepopulated_fields = {"slug": ("title",)}
+
+
+@admin.register(Goal)
+class GoalAdmin(ImportExportModelAdmin):
+    list_display = ("title", "client", "status", "progress", "target_date", "created_at")
+    list_filter = ("status",)
+    search_fields = ("title", "client__email", "client__first_name")
+
+
+@admin.register(SessionNote)
+class SessionNoteAdmin(ImportExportModelAdmin):
+    list_display = ("title", "client", "booking", "created_at")
+    search_fields = ("title", "content", "client__email")

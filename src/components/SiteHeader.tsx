@@ -64,8 +64,14 @@ export default function SiteHeader() {
                   to={user?.role === "admin" ? "/admin" : "/dashboard"}
                   className="text-sm font-medium text-foreground hover:text-primary transition-colors"
                 >
-                  {user?.role === "admin" ? "Admin" : "My Sessions"}
+                  {user?.role === "admin" ? "Admin" : "Dashboard"}
                 </Link>
+                {user?.role !== "admin" && (
+                  <>
+                    <Link to="/progress" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Progress</Link>
+                    <Link to="/profile" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Profile</Link>
+                  </>
+                )}
                 <button
                   onClick={logout}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -125,8 +131,14 @@ export default function SiteHeader() {
                       onClick={() => setMobileOpen(false)}
                       className="px-3 py-2.5 text-sm font-medium text-foreground"
                     >
-                      {user?.role === "admin" ? "Admin" : "My Sessions"}
+                      {user?.role === "admin" ? "Admin" : "Dashboard"}
                     </Link>
+                    {user?.role !== "admin" && (
+                      <>
+                        <Link to="/progress" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 text-sm font-medium text-muted-foreground">Progress</Link>
+                        <Link to="/profile" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 text-sm font-medium text-muted-foreground">Profile</Link>
+                      </>
+                    )}
                     <button
                       onClick={() => { logout(); setMobileOpen(false); }}
                       className="px-3 py-2.5 text-sm text-left text-muted-foreground"

@@ -9,6 +9,7 @@ from .models import (
     BookingSlot, Booking, Testimonial, BlogPost, Event,
     LeadMagnetEntry, ContactMessage, AIUsageLog, VideoRoomEvent,
     VideoSignal, SystemConfiguration, ResourceCategory, Resource,
+    Goal, SessionNote,
 )
 
 User = get_user_model()
@@ -293,3 +294,52 @@ class AdminResourceSerializer(serializers.ModelSerializer):
         model = Resource
         fields = "__all__"
         read_only_fields = ["id", "download_count", "created_at", "updated_at"]
+
+
+# Profile
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "phone", "concerns"]
+
+    def validate_concerns(self, value):
+        return _clean(value)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+
+# Goals
+class GoalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goal
+        fields = [
+            "id", "title", "description", "status", "progress",
+            "target_date", "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_title(self, value):
+        return _clean(value)
+
+    def validate_description(self, value):
+        return _clean(value)
+
+
+# Session Notes
+class SessionNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SessionNote
+        fields = [
+            "id", "title", "content", "booking",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_title(self, value):
+        return _clean(value)
+
+    def validate_content(self, value):
+        return _clean(value)

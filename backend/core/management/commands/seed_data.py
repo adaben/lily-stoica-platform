@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 
 from core.models import (
     BookingSlot, Testimonial, BlogPost, Event, SystemConfiguration,
-    ResourceCategory, Resource,
+    ResourceCategory, Resource, Goal, SessionNote,
 )
 
 logger = logging.getLogger("core")
@@ -223,6 +223,49 @@ class Command(BaseCommand):
                 is_published=True,
             )
             self.stdout.write(self.style.SUCCESS("  Created resource categories and resources"))
+
+        # Client goals (demo)
+        client_user = User.objects.filter(email="client@example.com").first()
+        if client_user and not Goal.objects.exists():
+            Goal.objects.create(
+                client=client_user,
+                title="Reduce daily stress levels",
+                description="Practise nervous system regulation techniques daily and track progress over 30 days.",
+                status="active",
+                progress=45,
+                target_date=date.today() + timedelta(days=30),
+            )
+            Goal.objects.create(
+                client=client_user,
+                title="Improve sleep quality",
+                description="Implement a consistent wind-down routine and aim for 7+ hours of quality sleep.",
+                status="active",
+                progress=20,
+                target_date=date.today() + timedelta(days=60),
+            )
+            Goal.objects.create(
+                client=client_user,
+                title="Complete mindfulness introduction",
+                description="Attend the introductory mindfulness workshop and practise daily for two weeks.",
+                status="completed",
+                progress=100,
+                target_date=date.today() - timedelta(days=10),
+            )
+            self.stdout.write(self.style.SUCCESS("  Created demo goals"))
+
+        # Client session notes (demo)
+        if client_user and not SessionNote.objects.exists():
+            SessionNote.objects.create(
+                client=client_user,
+                title="Reflections after first session",
+                content="Felt noticeably calmer after the body scan exercise. The breathing technique Lily taught me is something I can use anywhere — even at work during stressful moments.",
+            )
+            SessionNote.objects.create(
+                client=client_user,
+                title="Week 3 check-in",
+                content="Sleep has improved significantly. I am waking up less during the night and my morning routine feels more grounded. Still working on consistency with the evening wind-down.",
+            )
+            self.stdout.write(self.style.SUCCESS("  Created demo session notes"))
 
         # System config
         config = SystemConfiguration.load()

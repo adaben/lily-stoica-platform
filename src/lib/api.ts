@@ -132,6 +132,8 @@ export interface UserData {
   role: "client" | "admin";
   is_approved: boolean;
   phone?: string;
+  concerns?: string;
+  date_joined?: string;
   created_at: string;
 }
 
@@ -256,6 +258,26 @@ export interface Resource {
   is_published: boolean;
   is_premium: boolean;
   download_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  description: string;
+  status: "active" | "completed" | "paused";
+  progress: number;
+  target_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SessionNote {
+  id: string;
+  title: string;
+  content: string;
+  booking: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -484,3 +506,94 @@ export const apiUpdateSettings = (data: Record<string, unknown>) =>
 
 export const apiTestGemini = () =>
   apiFetch<{ status: string; message: string }>("/ai/test/");
+
+/* ── Profile ── */
+
+export const apiUpdateProfile = (data: { first_name?: string; last_name?: string; phone?: string; concerns?: string }) =>
+  apiFetch<UserData>("/profile/update/", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+
+export const apiChangePassword = (currentPassword: string, newPassword: string) =>
+  apiFetch<{ detail: string }>("/profile/change-password/", {
+    method: "POST",
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+
+/* ── Goals (client) ── */
+
+export const apiGetMyGoals = () =>
+  apiFetch<Goal[]>("/goals/");
+
+export const apiCreateGoal = (data: Partial<Goal>) =>
+  apiFetch<Goal>("/goals/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const apiUpdateGoal = (id: string, data: Partial<Goal>) =>
+  apiFetch<Goal>(`/goals/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+
+export const apiDeleteGoal = (id: string) =>
+  apiFetch<void>(`/goals/${id}/`, { method: "DELETE" });
+
+/* ── Session Notes (client) ── */
+
+export const apiGetMyNotes = () =>
+  apiFetch<SessionNote[]>("/notes/");
+
+export const apiCreateNote = (data: { title?: string; content: string; booking?: number }) =>
+  apiFetch<SessionNote>("/notes/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const apiUpdateNote = (id: string, data: Partial<SessionNote>) =>
+  apiFetch<SessionNote>(`/notes/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+
+export const apiDeleteNote = (id: string) =>
+  apiFetch<void>(`/notes/${id}/`, { method: "DELETE" });
+
+/* ── Admin resources ── */
+
+export const apiAdminGetResources = () =>
+  apiFetch<Resource[]>("/admin/resources/");
+
+export const apiAdminCreateResource = (data: FormData) =>
+  apiFetch<Resource>("/admin/resources/", {
+    method: "POST",
+    body: data,
+  });
+
+export const apiAdminUpdateResource = (id: string, data: FormData) =>
+  apiFetch<Resource>(`/admin/resources/${id}/`, {
+    method: "PATCH",
+    body: data,
+  });
+
+export const apiAdminDeleteResource = (id: string) =>
+  apiFetch<void>(`/admin/resources/${id}/`, { method: "DELETE" });
+
+/* ── Admin goals ── */
+
+export const apiAdminGetClientGoals = (clientId: string) =>
+  apiFetch<Goal[]>(`/admin/goals/${clientId}/`);
+
+export const apiAdminCreateGoal = (data: { client: string; title: string; description?: string; target_date?: string }) =>
+  apiFetch<Goal>("/admin/goals/create/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const apiAdminUpdateGoal = (id: string, data: Partial<Goal>) =>
+  apiFetch<Goal>(`/admin/goals/${id}/update/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });

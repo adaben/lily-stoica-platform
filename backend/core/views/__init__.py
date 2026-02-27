@@ -10,3 +10,6 @@ from .ai import *  # noqa
 from .video import *  # noqa
 from .settings import *  # noqa
 from .resources import *  # noqa
+from .profile import *  # noqa
+from .goals import *  # noqa
+from .notes import *  # noqa

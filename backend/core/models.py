@@ -293,6 +293,62 @@ class Event(models.Model):
 # ---------------------------------------------------------------------------
 # Lead magnet
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Client Goals (coaching progress tracking)
+# ---------------------------------------------------------------------------
+class Goal(models.Model):
+    """A coaching goal set for a client."""
+
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("completed", "Completed"),
+        ("paused", "Paused"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="goals")
+    title = models.CharField(max_length=300)
+    description = models.TextField(blank=True, default="")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
+    progress = models.PositiveSmallIntegerField(default=0, help_text="0-100 percentage")
+    target_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.client.full_name}: {self.title} ({self.status})"
+
+
+# ---------------------------------------------------------------------------
+# Session Notes (client's personal reflections)
+# ---------------------------------------------------------------------------
+class SessionNote(models.Model):
+    """A personal note or reflection written by a client."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="session_notes")
+    title = models.CharField(max_length=300, blank=True, default="")
+    content = models.TextField()
+    booking = models.ForeignKey(
+        "Booking", on_delete=models.SET_NULL, null=True, blank=True, related_name="session_notes"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Note by {self.client.full_name}: {self.title or 'Untitled'}"
+
+
+# ---------------------------------------------------------------------------
+# Lead magnet (original section continues below)
+# ---------------------------------------------------------------------------
 class LeadMagnetEntry(models.Model):
     """People who requested the free nervous system reset recording."""
 

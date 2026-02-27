@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   Calendar, Settings, Loader2, Clock,
   Brain, Bell, FileText, CalendarDays,
-  Plus, Pencil, Trash2, Eye, EyeOff, Pin,
+  Plus, Pencil, Trash2, Eye, EyeOff, Pin, BookOpen, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -16,10 +16,12 @@ import {
   apiAdminGetBlogPosts, apiAdminCreateBlogPost, apiAdminUpdateBlogPost,
   apiAdminDeleteBlogPost, apiAdminToggleBlogPost,
   apiAdminGetEvents, apiAdminCreateEvent, apiAdminUpdateEvent, apiAdminDeleteEvent,
-  type Booking, type BlogPost, type Event,
+  apiAdminGetResources, apiAdminCreateResource, apiAdminUpdateResource, apiAdminDeleteResource,
+  apiGetResourceCategories,
+  type Booking, type BlogPost, type Event, type Resource, type ResourceCategory,
 } from "@/lib/api";
 
-type Tab = "bookings" | "schedule" | "blog" | "events" | "settings";
+type Tab = "bookings" | "schedule" | "blog" | "events" | "resources" | "settings";
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("bookings");
@@ -45,6 +47,7 @@ export default function AdminDashboard() {
               { key: "schedule", icon: Clock, label: "Schedule" },
               { key: "blog", icon: FileText, label: "Blog" },
               { key: "events", icon: CalendarDays, label: "Events" },
+              { key: "resources", icon: BookOpen, label: "Resources" },
               { key: "settings", icon: Settings, label: "Settings" },
             ] as const).map((t) => (
               <button
@@ -64,6 +67,7 @@ export default function AdminDashboard() {
           {tab === "schedule" && <SchedulePanel />}
           {tab === "blog" && <BlogPanel />}
           {tab === "events" && <EventsPanel />}
+          {tab === "resources" && <ResourcesPanel />}
           {tab === "settings" && <SettingsPanel />}
         </div>
       </section>
@@ -222,6 +226,221 @@ function SchedulePanel() {
           Create Slot
         </button>
       </form>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/*  Resources Panel                                                        */
+/* ──────────────────────────────────────────────────────────────────────── */
+function ResourcesPanel() {
+  const qc = useQueryClient();
+  const { data: resources = [], isLoading } = useQuery({ queryKey: ["admin-resources"], queryFn: apiAdminGetResources });
+  const { data: categories = [] } = useQuery({ queryKey: ["resource-categories"], queryFn: apiGetResourceCategories });
+
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [description, setDescription] = useState("");
+  const [resourceType, setResourceType] = useState("guide");
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [externalUrl, setExternalUrl] = useState("");
+  const [content, setContent] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
+  const [isPublished, setIsPublished] = useState(true);
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const resetForm = () => {
+    setEditId(null);
+    setTitle("");
+    setSlug("");
+    setDescription("");
+    setResourceType("guide");
+    setCategoryId("");
+    setExternalUrl("");
+    setContent("");
+    setIsPremium(false);
+    setIsPublished(true);
+    setFile(null);
+    setShowForm(false);
+  };
+
+  const openEdit = (r: Resource) => {
+    setEditId(r.id);
+    setTitle(r.title);
+    setSlug(r.slug);
+    setDescription(r.description);
+    setResourceType(r.resource_type);
+    setCategoryId(r.category ? String(r.category) : "");
+    setExternalUrl(r.external_url);
+    setContent(r.content);
+    setIsPremium(r.is_premium);
+    setIsPublished(r.is_published);
+    setFile(null);
+    setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!title.trim()) return;
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append("title", title);
+      fd.append("slug", slug || title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
+      fd.append("description", description);
+      fd.append("resource_type", resourceType);
+      if (categoryId) fd.append("category", categoryId);
+      fd.append("external_url", externalUrl);
+      fd.append("content", content);
+      fd.append("is_premium", String(isPremium));
+      fd.append("is_published", String(isPublished));
+      if (file) fd.append("file", file);
+
+      if (editId) {
+        await apiAdminUpdateResource(editId, fd);
+        toast.success("Resource updated.");
+      } else {
+        await apiAdminCreateResource(fd);
+        toast.success("Resource created.");
+      }
+      qc.invalidateQueries({ queryKey: ["admin-resources"] });
+      resetForm();
+    } catch {
+      toast.error("Could not save resource.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this resource?")) return;
+    try {
+      await apiAdminDeleteResource(id);
+      qc.invalidateQueries({ queryKey: ["admin-resources"] });
+      toast.success("Resource deleted.");
+    } catch {
+      toast.error("Could not delete resource.");
+    }
+  };
+
+  if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{resources.length} resource(s)</p>
+        <button
+          onClick={() => { resetForm(); setShowForm(true); }}
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 transition-colors"
+        >
+          <Plus className="w-4 h-4" /> Add Resource
+        </button>
+      </div>
+
+      {/* Resource list */}
+      <div className="space-y-2">
+        {resources.map((r: Resource) => (
+          <div key={r.id} className="bg-white rounded-xl border border-border/60 p-4 flex items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h4 className="text-sm font-semibold text-foreground truncate">{r.title}</h4>
+                <span className="text-[10px] uppercase font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{r.resource_type}</span>
+                {r.is_premium && <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Premium</span>}
+                {!r.is_published && <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">Draft</span>}
+              </div>
+              <p className="text-xs text-muted-foreground truncate">{r.description}</p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button onClick={() => openEdit(r)} className="p-1.5 rounded hover:bg-accent"><Pencil className="w-3.5 h-3.5" /></button>
+              <button onClick={() => handleDelete(r.id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Create / Edit form dialog */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl border border-border/60 shadow-lg w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-cormorant font-bold text-foreground">
+                {editId ? "Edit Resource" : "New Resource"}
+              </h3>
+              <button onClick={resetForm} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">Title</label>
+                <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary/30 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">Slug</label>
+                <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="auto-generated if empty" className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary/30 focus:outline-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1">Type</label>
+                  <select value={resourceType} onChange={(e) => setResourceType(e.target.value)} className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background">
+                    <option value="guide">Written Guide</option>
+                    <option value="pdf">PDF</option>
+                    <option value="audio">Audio</option>
+                    <option value="video">Video</option>
+                    <option value="link">External Link</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1">Category</label>
+                  <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background">
+                    <option value="">None</option>
+                    {categories.map((c: ResourceCategory) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">Description</label>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary/30 focus:outline-none resize-none" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">Content (for guides)</label>
+                <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={4} className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary/30 focus:outline-none resize-none" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">External URL</label>
+                <input value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary/30 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1">File upload</label>
+                <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="text-sm" />
+              </div>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} className="rounded" />
+                  Premium (login required)
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="rounded" />
+                  Published
+                </label>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-5">
+              <button onClick={resetForm} className="px-4 py-2 text-sm text-muted-foreground">Cancel</button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !title.trim()}
+                className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {editId ? "Update" : "Create"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

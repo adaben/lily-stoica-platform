@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     health, auth, bookings, testimonials, blog, events,
     lead_magnet, contact, ai, video, settings, resources,
+    profile, goals, notes,
 )
 
 urlpatterns = [
@@ -80,6 +81,23 @@ urlpatterns = [
     path("video/<str:room_id>/event/", video.log_video_event, name="log-video-event"),
     path("video/<str:room_id>/signal/send/", video.signal_send, name="signal-send"),
     path("video/<str:room_id>/signal/poll/", video.signal_poll, name="signal-poll"),
+
+    # Profile (authenticated)
+    path("profile/update/", profile.update_profile, name="update-profile"),
+    path("profile/change-password/", profile.change_password, name="change-password"),
+
+    # Goals (client)
+    path("goals/", goals.my_goals, name="my-goals"),
+    path("goals/<uuid:goal_id>/", goals.my_goal_detail, name="my-goal-detail"),
+
+    # Goals (admin)
+    path("admin/goals/<uuid:client_id>/", goals.admin_client_goals, name="admin-client-goals"),
+    path("admin/goals/create/", goals.admin_create_goal, name="admin-create-goal"),
+    path("admin/goals/<uuid:goal_id>/update/", goals.admin_update_goal, name="admin-update-goal"),
+
+    # Session notes (client)
+    path("notes/", notes.my_notes, name="my-notes"),
+    path("notes/<uuid:note_id>/", notes.my_note_detail, name="my-note-detail"),
 
     # Settings (admin)
     path("settings/", settings.get_settings, name="get-settings"),
