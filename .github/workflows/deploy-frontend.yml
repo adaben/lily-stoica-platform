@@ -83,6 +83,10 @@ jobs:
             # Restart frontend
             docker compose -f docker-compose.prod.yml up -d frontend
 
+            # Connect to NPM network so snf_npm can reach lily containers
+            docker network connect snf_network lily_frontend || true
+            docker network connect snf_network lily_backend || true
+
             # Cleanup old images
             docker image prune -f
 
