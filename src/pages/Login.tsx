@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, Brain } from "lucide-react";
+import { Loader2, Brain, Shield, User } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -31,13 +31,28 @@ export default function Login() {
     }
   };
 
+  const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
+    setEmail(quickEmail);
+    setPassword(quickPass);
+    setLoading(true);
+    try {
+      const user = await login(quickEmail, quickPass);
+      toast.success(`Welcome back, ${user.first_name}.`);
+      navigate(user.role === "admin" ? "/admin" : "/dashboard");
+    } catch {
+      toast.error("Could not auto-login with test credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Helmet>
         <title>Sign In | Calm Lily</title>
       </Helmet>
 
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent/30 via-white to-lily-blush/20 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent/30 via-white to-lily-blush/20 px-4 py-10">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6">
@@ -87,6 +102,38 @@ export default function Login() {
               Create one here
             </Link>
           </p>
+
+          {/* ── Quick Test Access ── */}
+          <div className="mt-8">
+            <p className="text-center text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3">
+              Quick Test Access
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleQuickLogin("lily@lilystoica.com", "admin1234")}
+                disabled={loading}
+                className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl border border-border/60 bg-white hover:border-primary hover:shadow-lg transition-all group disabled:opacity-50"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <Shield className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-xs font-bold text-primary uppercase tracking-wide">Admin</span>
+                <span className="text-[10px] text-muted-foreground leading-tight">Full Dashboard</span>
+              </button>
+
+              <button
+                onClick={() => handleQuickLogin("client@example.com", "client1234")}
+                disabled={loading}
+                className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl border border-border/60 bg-white hover:border-violet-400 hover:shadow-lg transition-all group disabled:opacity-50"
+              >
+                <div className="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center group-hover:bg-violet-100 transition-colors">
+                  <User className="w-5 h-5 text-violet-600" />
+                </div>
+                <span className="text-xs font-bold text-violet-600 uppercase tracking-wide">Client</span>
+                <span className="text-[10px] text-muted-foreground leading-tight">Coachee Space</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>
