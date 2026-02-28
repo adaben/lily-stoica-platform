@@ -5,10 +5,11 @@ import {
   Calendar, Settings, Loader2, Clock,
   Brain, Bell, FileText, CalendarDays,
   Plus, Pencil, Trash2, Eye, EyeOff, Pin, BookOpen, X,
-  Repeat,
+  Repeat, Video,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import {
@@ -139,6 +140,15 @@ function BookingsPanel() {
                 >
                   Confirm
                 </button>
+              )}
+              {b.status === "confirmed" && b.video_room_id && (
+                <Link
+                  to={`/session/${b.id}`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
+                >
+                  <Video className="w-3.5 h-3.5" />
+                  Join
+                </Link>
               )}
             </div>
           </div>
