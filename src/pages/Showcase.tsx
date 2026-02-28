@@ -231,7 +231,7 @@ export default function Showcase() {
                   where experienced professionals volunteer their time to help small businesses with digital transformation.
                 </p>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  <strong>Adam Dawson</strong> (Fractional CTO &amp; Software Architect) mentored 
+                  <strong>Adam Benbrahim</strong> (Fractional CTO &amp; Software Architect) mentored 
                   <strong> LiLy Stoica</strong> (Neurocoach &amp; Hypnotherapist) to establish a complete 
                   online presence for her coaching practice, <em>CALM LILY LTD</em>.
                 </p>

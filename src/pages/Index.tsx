@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
+import { useShowcase } from "@/hooks/useShowcase";
 import {
   Brain, Heart, Shield, Sparkles, ArrowRight, Calendar,
   Star, Users, Leaf, Activity, MessageCircle,
@@ -73,6 +74,10 @@ const testimonials = [
 ];
 
 export default function Index() {
+  const showcase = useShowcase();
+  /* When inside a Showcase iframe, skip framer-motion initial states so elements are visible for print/PDF */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mInit = (v: any) => showcase ? undefined : v;
   return (
     <>
       <Helmet>
@@ -109,7 +114,7 @@ export default function Index() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-8">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={mInit({ opacity: 0, y: 20 })}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary/8 rounded-full border border-primary/10"
@@ -121,7 +126,7 @@ export default function Index() {
               </motion.div>
 
               <motion.h1
-                initial={{ opacity: 0, y: 30 }}
+                initial={mInit({ opacity: 0, y: 30 })}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
                 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-cormorant font-bold text-foreground leading-[1.05] tracking-tight"
@@ -132,7 +137,7 @@ export default function Index() {
                   Reclaim your life.
                   <motion.span
                     className="absolute -bottom-2 left-0 h-[3px] bg-primary/30 rounded-full"
-                    initial={{ width: 0 }}
+                    initial={mInit({ width: 0 })}
                     animate={{ width: "100%" }}
                     transition={{ duration: 1.2, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
                   />
@@ -140,7 +145,7 @@ export default function Index() {
               </motion.h1>
 
               <motion.p
-                initial={{ opacity: 0, y: 20 }}
+                initial={mInit({ opacity: 0, y: 20 })}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.3 }}
                 className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-lg"
@@ -151,7 +156,7 @@ export default function Index() {
               </motion.p>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={mInit({ opacity: 0, y: 20 })}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.45 }}
                 className="flex flex-col sm:flex-row gap-3"
@@ -173,7 +178,7 @@ export default function Index() {
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={mInit({ opacity: 0 })}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
                 className="flex items-center gap-6 pt-2"
@@ -196,7 +201,7 @@ export default function Index() {
 
             {/* Hero visual — animated brain illustration */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.85 }}
+              initial={mInit({ opacity: 0, scale: 0.85 })}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="relative flex justify-center lg:justify-end"
@@ -307,7 +312,7 @@ export default function Index() {
                 </div>
                 {/* Floating badges with stagger */}
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={mInit({ opacity: 0, y: 10 })}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8, duration: 0.5 }}
                   className="absolute -top-2 right-8 bg-white rounded-xl shadow-card px-4 py-2.5 animate-float"
@@ -315,7 +320,7 @@ export default function Index() {
                   <p className="text-xs font-semibold text-primary">PHPA Registered</p>
                 </motion.div>
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={mInit({ opacity: 0, y: 10 })}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1, duration: 0.5 }}
                   className="absolute bottom-4 -left-4 bg-white rounded-xl shadow-card px-4 py-2.5 animate-float"
@@ -324,7 +329,7 @@ export default function Index() {
                   <p className="text-xs font-semibold text-primary">Level 5 Accredited</p>
                 </motion.div>
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={mInit({ opacity: 0, y: 10 })}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.2, duration: 0.5 }}
                   className="absolute top-1/2 -right-6 bg-white rounded-xl shadow-card px-4 py-2.5 animate-float"

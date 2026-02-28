@@ -1,5 +1,6 @@
 import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
+import { useShowcase } from "@/hooks/useShowcase";
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 32 },
@@ -61,7 +62,9 @@ export function AnimatedSection({
   delay = 0,
   as = "div",
 }: AnimatedSectionProps) {
+  const showcase = useShowcase();
   const Component = motion[as];
+  if (showcase) return <Component className={className}>{children}</Component>;
   return (
     <Component
       variants={variants[variant]}
@@ -87,7 +90,9 @@ export function StaggerContainer({
   className,
   as = "div",
 }: StaggerContainerProps) {
+  const showcase = useShowcase();
   const Component = motion[as];
+  if (showcase) return <Component className={className}>{children}</Component>;
   return (
     <Component
       variants={staggerContainer}
