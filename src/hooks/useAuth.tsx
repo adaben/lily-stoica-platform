@@ -27,9 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const showcaseToken = params.get("_st");
     if (showcaseToken) {
       localStorage.setItem("lily_access_token", showcaseToken);
-      /* Clean the URL so tokens don't leak in history */
+      /* Clean only the token from the URL (keep _showcase for other components) */
       params.delete("_st");
-      params.delete("_showcase");
       const clean = params.toString();
       const base = window.location.pathname + (clean ? `?${clean}` : "");
       window.history.replaceState({}, "", base);

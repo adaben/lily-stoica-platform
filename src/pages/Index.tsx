@@ -75,9 +75,10 @@ const testimonials = [
 
 export default function Index() {
   const showcase = useShowcase();
-  /* When inside a Showcase iframe, skip framer-motion initial states so elements are visible for print/PDF */
+  /* When inside a Showcase iframe, initial={false} tells framer-motion to
+     skip mount animation and render directly with the `animate` values. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mInit = (v: any) => showcase ? undefined : v;
+  const mInit = (v: any) => showcase ? false : v;
   return (
     <>
       <Helmet>
