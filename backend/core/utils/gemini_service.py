@@ -10,6 +10,8 @@ import json
 import logging
 import requests
 
+from typing import Tuple
+
 logger = logging.getLogger("core")
 
 VERTEX_URL = (
@@ -24,7 +26,7 @@ def call_gemini(
     system_prompt: str,
     api_key: str,
     max_tokens: int = 512,
-) -> tuple[str, int]:
+) -> Tuple[str, int]:
     """
     Call Gemini 2.0 Flash via Vertex AI and return (response_text, tokens_used).
     """

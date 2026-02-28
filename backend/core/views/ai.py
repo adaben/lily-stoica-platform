@@ -2,6 +2,7 @@
 import hashlib
 import logging
 from datetime import timedelta
+from typing import Optional
 
 from django.utils import timezone
 from rest_framework import status
@@ -30,7 +31,7 @@ def _rate_key(request) -> str:
     return f"anon:{hashlib.sha256(f'{ip}:{ua}'.encode()).hexdigest()[:16]}"
 
 
-def _check_rate_limit(request) -> dict | None:
+def _check_rate_limit(request) -> Optional[dict]:
     """Return a 429 dict if rate-limited, else None."""
     key = _rate_key(request)
     now = timezone.now()
