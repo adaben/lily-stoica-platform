@@ -1,11 +1,26 @@
 """Admin settings views."""
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from ..models import SystemConfiguration
 from ..serializers import SystemConfigurationSerializer
 from ..permissions import IsAdmin
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def public_settings(request):
+    """Public feature flags (no auth required)."""
+    config = SystemConfiguration.load()
+    return Response({
+        "beta_mode": config.beta_mode,
+        "blog_enabled": config.blog_enabled,
+        "events_enabled": config.events_enabled,
+        "booking_enabled": config.booking_enabled,
+        "lead_magnet_enabled": config.lead_magnet_enabled,
+    })
 
 
 @api_view(["GET"])

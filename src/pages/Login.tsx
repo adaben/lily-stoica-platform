@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, Brain, Shield, User } from "lucide-react";
+import { Loader2, Brain, Shield, User, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { apiGetPublicSettings } from "@/lib/api";
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
@@ -11,6 +12,13 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [betaMode, setBetaMode] = useState(false);
+
+  useEffect(() => {
+    apiGetPublicSettings()
+      .then((s) => setBetaMode(s.beta_mode))
+      .catch(() => setBetaMode(false));
+  }, []);
 
   if (isAuthenticated) {
     navigate("/dashboard");
@@ -103,10 +111,17 @@ export default function Login() {
             </Link>
           </p>
 
-          {/* ── Quick Test Access ── */}
+          {/* ── Quick Test Access (beta only) ── */}
+          {betaMode && (
           <div className="mt-8">
-            <p className="text-center text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3">
-              Quick Test Access
+            <div className="flex items-center justify-center gap-1.5 mb-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+              <p className="text-[11px] font-bold text-amber-600 uppercase tracking-widest">
+                Beta — Test Accounts
+              </p>
+            </div>
+            <p className="text-center text-[10px] text-muted-foreground mb-3">
+              These quick-login cards will be disabled at official launch.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -134,6 +149,7 @@ export default function Login() {
               </button>
             </div>
           </div>
+          )}
         </div>
       </div>
     </>

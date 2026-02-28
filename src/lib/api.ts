@@ -514,6 +514,19 @@ export const apiSubmitContact = (data: { name: string; email: string; message: s
     body: JSON.stringify(data),
   });
 
+/* ── Public settings (no auth) ── */
+
+export interface PublicSettings {
+  beta_mode: boolean;
+  blog_enabled: boolean;
+  events_enabled: boolean;
+  booking_enabled: boolean;
+  lead_magnet_enabled: boolean;
+}
+
+export const apiGetPublicSettings = () =>
+  apiFetch<PublicSettings>("/settings/public/");
+
 /* ── Admin settings ── */
 
 export const apiGetSettings = () =>

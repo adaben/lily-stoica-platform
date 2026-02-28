@@ -102,6 +102,9 @@ urlpatterns = [
     path("notes/", notes.my_notes, name="my-notes"),
     path("notes/<uuid:note_id>/", notes.my_note_detail, name="my-note-detail"),
 
+    # Settings (public feature flags)
+    path("settings/public/", settings.public_settings, name="public-settings"),
+
     # Settings (admin)
     path("settings/", settings.get_settings, name="get-settings"),
     path("settings/update/", settings.update_settings, name="update-settings"),

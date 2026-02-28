@@ -504,6 +504,10 @@ class SystemConfiguration(models.Model):
     ai_max_tokens = models.PositiveIntegerField(default=512)
 
     # Feature flags
+    beta_mode = models.BooleanField(
+        default=True,
+        help_text="When enabled, shows test login cards on the sign-in page.",
+    )
     blog_enabled = models.BooleanField(default=True)
     events_enabled = models.BooleanField(default=True)
     booking_enabled = models.BooleanField(default=True)

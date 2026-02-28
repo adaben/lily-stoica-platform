@@ -5,7 +5,7 @@ import {
   Calendar, Settings, Loader2, Clock,
   Brain, Bell, FileText, CalendarDays,
   Plus, Pencil, Trash2, Eye, EyeOff, Pin, BookOpen, X,
-  Repeat, Video,
+  Repeat, Video, FlaskConical,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -737,6 +737,10 @@ function SettingsPanel() {
   const [aiSystemPrompt, setAiSystemPrompt] = useState("");
   const [aiMaxTokens, setAiMaxTokens] = useState(512);
 
+  /* beta mode */
+  const [betaMode, setBetaMode] = useState(true);
+  const [savingBeta, setSavingBeta] = useState(false);
+
   const [loaded, setLoaded] = useState(false);
 
   /* sync server → local state once */
@@ -749,6 +753,7 @@ function SettingsPanel() {
     setGeminiKey((settings.gemini_api_key as string) ?? "");
     setAiSystemPrompt((settings.ai_system_prompt as string) ?? "");
     setAiMaxTokens((settings.ai_max_tokens as number) ?? 512);
+    setBetaMode(settings.beta_mode as boolean ?? true);
     setLoaded(true);
   }
 
@@ -792,6 +797,58 @@ function SettingsPanel() {
 
   return (
     <div className="space-y-6 max-w-lg">
+      {/* ── Beta Mode ── */}
+      <div className="bg-white rounded-2xl border border-border/60 p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <FlaskConical className="w-5 h-5 text-amber-500" />
+          <h2 className="text-lg font-cormorant font-bold text-foreground">Beta Mode</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          When enabled, quick-login test cards are shown on the sign-in page.
+          Disable this before official launch.
+        </p>
+
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={betaMode}
+              onClick={() => setBetaMode(!betaMode)}
+              className={`relative w-11 h-6 rounded-full transition-colors ${betaMode ? "bg-amber-500" : "bg-gray-300"}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${betaMode ? "translate-x-5" : ""}`} />
+            </button>
+            <span className="text-sm font-medium text-foreground">
+              {betaMode
+                ? <span className="text-amber-600 font-semibold">Beta ON — test logins visible</span>
+                : <span className="text-green-700">Production — test logins hidden</span>
+              }
+            </span>
+          </label>
+
+          <button
+            onClick={async () => {
+              setSavingBeta(true);
+              try {
+                await apiUpdateSettings({ beta_mode: betaMode });
+                qc.invalidateQueries({ queryKey: ["admin-settings"] });
+                toast.success(betaMode ? "Beta mode enabled." : "Beta mode disabled — production ready.");
+              } catch {
+                toast.error("Could not update beta mode.");
+              } finally {
+                setSavingBeta(false);
+              }
+            }}
+            disabled={savingBeta}
+            className="px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+          >
+            {savingBeta && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            Save
+          </button>
+        </div>
+      </div>
+
       {/* ── Email / Resend ── */}
       <div className="bg-white rounded-2xl border border-border/60 p-6">
         <div className="flex items-center gap-2 mb-4">
