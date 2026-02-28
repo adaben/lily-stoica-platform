@@ -457,12 +457,20 @@ function SettingsPanel() {
   });
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savingAI, setSavingAI] = useState(false);
 
   /* email fields */
   const [emailTestMode, setEmailTestMode] = useState<boolean>(true);
   const [testRecipient, setTestRecipient] = useState("");
   const [resendKey, setResendKey] = useState("");
   const [emailFrom, setEmailFrom] = useState("hello@lilystoica.com");
+
+  /* AI fields */
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [geminiKey, setGeminiKey] = useState("");
+  const [aiSystemPrompt, setAiSystemPrompt] = useState("");
+  const [aiMaxTokens, setAiMaxTokens] = useState(512);
+
   const [loaded, setLoaded] = useState(false);
 
   /* sync server → local state once */
@@ -471,6 +479,10 @@ function SettingsPanel() {
     setTestRecipient((settings.email_test_recipient as string) ?? "");
     setResendKey((settings.resend_api_key as string) ?? "");
     setEmailFrom((settings.email_from as string) ?? "hello@lilystoica.com");
+    setAiEnabled(settings.ai_enabled as boolean ?? false);
+    setGeminiKey((settings.gemini_api_key as string) ?? "");
+    setAiSystemPrompt((settings.ai_system_prompt as string) ?? "");
+    setAiMaxTokens((settings.ai_max_tokens as number) ?? 512);
     setLoaded(true);
   }
 
@@ -595,20 +607,104 @@ function SettingsPanel() {
       <div className="bg-white rounded-2xl border border-border/60 p-6">
         <div className="flex items-center gap-2 mb-4">
           <Brain className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-cormorant font-bold text-foreground">AI Assistant</h2>
+          <h2 className="text-lg font-cormorant font-bold text-foreground">AI Assistant (Vertex AI)</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          The AI assistant uses Gemini to answer client questions about services,
-          booking and general neurocoaching guidance.
+          Uses Gemini 2.0 Flash via Google Cloud Vertex AI. The API key is a Vertex AI key for the <code className="text-xs bg-muted px-1 rounded">perennix-experiments</code> project.
         </p>
-        <button
-          onClick={handleTestAI}
-          disabled={testing}
-          className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
-        >
-          {testing && <Loader2 className="w-4 h-4 animate-spin" />}
-          Test AI Connection
-        </button>
+
+        {/* AI Enabled toggle */}
+        <label className="flex items-center gap-3 mb-4 cursor-pointer select-none">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={aiEnabled}
+            onClick={() => setAiEnabled(!aiEnabled)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${aiEnabled ? "bg-primary" : "bg-gray-300"}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${aiEnabled ? "translate-x-5" : ""}`} />
+          </button>
+          <span className="text-sm font-medium text-foreground">
+            AI Assistant {aiEnabled ? <span className="text-green-700 font-semibold">(ON)</span> : <span className="text-gray-500">(OFF)</span>}
+          </span>
+        </label>
+
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Vertex AI / Gemini API Key
+            </label>
+            <input
+              type="password"
+              value={geminiKey}
+              onChange={(e) => setGeminiKey(e.target.value)}
+              placeholder="AIzaSy..."
+              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              System Prompt
+            </label>
+            <textarea
+              value={aiSystemPrompt}
+              onChange={(e) => setAiSystemPrompt(e.target.value)}
+              rows={4}
+              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+              placeholder="You are Lily's virtual assistant..."
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Instructions given to the AI before every user message.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Max Output Tokens
+            </label>
+            <input
+              type="number"
+              value={aiMaxTokens}
+              onChange={(e) => setAiMaxTokens(Math.max(50, Math.min(4096, parseInt(e.target.value) || 512)))}
+              min={50}
+              max={4096}
+              className="w-32 px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">50 – 4096. Higher values = longer responses, more cost.</p>
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-4">
+          <button
+            onClick={async () => {
+              setSavingAI(true);
+              try {
+                await apiUpdateSettings({
+                  ai_enabled: aiEnabled,
+                  gemini_api_key: geminiKey,
+                  ai_system_prompt: aiSystemPrompt,
+                  ai_max_tokens: aiMaxTokens,
+                });
+                qc.invalidateQueries({ queryKey: ["admin-settings"] });
+                toast.success("AI settings saved.");
+              } catch {
+                toast.error("Could not save AI settings.");
+              } finally {
+                setSavingAI(false);
+              }
+            }}
+            disabled={savingAI}
+            className="flex-1 py-2.5 bg-primary text-primary-foreground font-medium rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {savingAI && <Loader2 className="w-4 h-4 animate-spin" />}
+            Save AI Settings
+          </button>
+          <button
+            onClick={handleTestAI}
+            disabled={testing || !geminiKey}
+            className="px-4 py-2.5 text-sm border border-primary text-primary rounded-full hover:bg-primary/5 transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {testing && <Loader2 className="w-4 h-4 animate-spin" />}
+            Test Connection
+          </button>
+        </div>
       </div>
     </div>
   );

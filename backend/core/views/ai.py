@@ -1,5 +1,9 @@
-"""AI assistant views using Google Gemini."""
+"""AI assistant views using Gemini via Vertex AI."""
+import hashlib
 import logging
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,6 +15,39 @@ from ..permissions import IsAdmin
 from ..utils.gemini_service import call_gemini, test_connection
 
 logger = logging.getLogger("core")
+
+# Rate limits
+RATE_PER_MINUTE = 5    # max requests per minute per IP/user
+RATE_PER_DAY = 50      # max requests per day per IP/user
+
+
+def _rate_key(request) -> str:
+    """Return a consistent identifier for rate-limiting (user pk or IP hash)."""
+    if request.user.is_authenticated:
+        return f"user:{request.user.pk}"
+    ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")).split(",")[0].strip()
+    ua = request.META.get("HTTP_USER_AGENT", "")
+    return f"anon:{hashlib.sha256(f'{ip}:{ua}'.encode()).hexdigest()[:16]}"
+
+
+def _check_rate_limit(request) -> dict | None:
+    """Return a 429 dict if rate-limited, else None."""
+    key = _rate_key(request)
+    now = timezone.now()
+
+    # Per-minute check
+    one_min_ago = now - timedelta(minutes=1)
+    minute_count = AIUsageLog.objects.filter(session_id=key, created_at__gte=one_min_ago).count()
+    if minute_count >= RATE_PER_MINUTE:
+        return {"detail": "Rate limit exceeded. Please wait a moment before trying again.", "retry_after_seconds": 60}
+
+    # Per-day check
+    day_start = now - timedelta(hours=24)
+    day_count = AIUsageLog.objects.filter(session_id=key, created_at__gte=day_start).count()
+    if day_count >= RATE_PER_DAY:
+        return {"detail": "Daily AI usage limit reached. Please try again tomorrow.", "retry_after_seconds": 3600}
+
+    return None
 
 
 @api_view(["GET"])
@@ -34,6 +71,11 @@ def ai_chat(request):
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 
+    # Rate limiting
+    rate_error = _check_rate_limit(request)
+    if rate_error:
+        return Response(rate_error, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
     serializer = AIChatSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
@@ -53,9 +95,10 @@ def ai_chat(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
-    # Log usage
+    # Log usage (session_id used for anonymous rate-limiting key)
     AIUsageLog.objects.create(
         user=request.user if request.user.is_authenticated else None,
+        session_id=_rate_key(request),
         prompt=user_message,
         response=response_text,
         tokens_used=tokens,

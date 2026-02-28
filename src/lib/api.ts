@@ -505,7 +505,7 @@ export const apiUpdateSettings = (data: Record<string, unknown>) =>
   });
 
 export const apiTestGemini = () =>
-  apiFetch<{ status: string; message: string }>("/ai/test/");
+  apiFetch<{ message: string }>("/ai/test/", { method: "POST" });
 
 /* ── Profile ── */
 

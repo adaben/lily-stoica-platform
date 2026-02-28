@@ -1,13 +1,22 @@
 """
-Gemini AI service for the LiLy Stoica platform.
-Uses the Gemini 2.0 Flash model via REST API.
+Gemini AI Service for the LiLy Stoica platform.
+
+Uses Vertex AI endpoint (same as SNF Gateway Hub):
+- Model: gemini-2.0-flash
+- Auth: x-goog-api-key header
+- Endpoint: us-central1-aiplatform.googleapis.com
 """
+import json
 import logging
 import requests
 
 logger = logging.getLogger("core")
 
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+VERTEX_URL = (
+    "https://us-central1-aiplatform.googleapis.com/v1"
+    "/projects/perennix-experiments/locations/us-central1"
+    "/publishers/google/models/gemini-2.0-flash:generateContent"
+)
 
 
 def call_gemini(
@@ -17,7 +26,7 @@ def call_gemini(
     max_tokens: int = 512,
 ) -> tuple[str, int]:
     """
-    Call Google Gemini and return (response_text, tokens_used).
+    Call Gemini 2.0 Flash via Vertex AI and return (response_text, tokens_used).
     """
     payload = {
         "contents": [
@@ -27,18 +36,32 @@ def call_gemini(
             }
         ],
         "generationConfig": {
-            "maxOutputTokens": max_tokens,
             "temperature": 0.7,
+            "topK": 40,
+            "topP": 0.95,
+            "maxOutputTokens": max_tokens,
         },
     }
 
+    headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": api_key,
+    }
+
     response = requests.post(
-        f"{GEMINI_API_URL}?key={api_key}",
-        json=payload,
-        timeout=30,
+        VERTEX_URL, json=payload, headers=headers, timeout=30,
     )
-    response.raise_for_status()
-    data = response.json()
+
+    try:
+        data = json.loads(response.text)
+    except json.JSONDecodeError:
+        logger.error("Gemini returned non-JSON: %s", response.text[:500])
+        raise RuntimeError(f"Gemini returned non-JSON response (HTTP {response.status_code})")
+
+    if not response.ok:
+        error_msg = data.get("error", {}).get("message", response.text[:300])
+        logger.error("Gemini API error %s: %s", response.status_code, error_msg)
+        raise RuntimeError(f"Gemini API error ({response.status_code}): {error_msg}")
 
     text = ""
     tokens = 0
@@ -56,7 +79,7 @@ def call_gemini(
 
 
 def test_connection(api_key: str) -> str:
-    """Send a simple test prompt to verify the API key works."""
+    """Send a simple test prompt to verify the Vertex AI key works."""
     text, _ = call_gemini(
         user_message="Hello, please respond with exactly: Connection successful.",
         system_prompt="You are a test assistant. Respond briefly.",

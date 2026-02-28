@@ -274,7 +274,10 @@ class Command(BaseCommand):
             config.email_test_mode = True
             config.email_test_recipient = "adaben@protonmail.com"
             config.email_from = "betatest-lily@perennix.io"
-            config.save()
+        # AI defaults (Vertex AI — key must be set via admin settings)
+        if not config.ai_enabled:
+            config.ai_enabled = True
+        config.save()
         self.stdout.write(self.style.SUCCESS("  System configuration initialised"))
 
         self.stdout.write(self.style.SUCCESS("Seed complete."))
