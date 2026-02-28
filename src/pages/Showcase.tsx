@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
-  Loader2, CheckCircle2, Printer, Brain, Video,
+  Loader2, Printer, Brain, Video,
   Shield, Users, Calendar, BookOpen, BarChart3, MessageSquare,
   Sparkles, Globe, Monitor, Layout, ChevronRight,
 } from "lucide-react";
@@ -81,7 +81,6 @@ const PAGES: ShowcaseEntry[] = [
 /* ── component ─────────────────────────────────────────────────────────── */
 export default function Showcase() {
   const [tokens, setTokens] = useState<Record<string, string>>({});
-  const [authProgress, setAuthProgress] = useState(0);
   const [authDone, setAuthDone] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -104,7 +103,6 @@ export default function Showcase() {
             results[u.role] = data.access;
           }
         } catch { /* skip */ }
-        if (!cancelled) setAuthProgress(((i + 1) / DEMO_USERS.length) * 100);
       }
       if (!cancelled) {
         setTokens(results);
@@ -158,57 +156,50 @@ export default function Showcase() {
           <div className="absolute bottom-[-60px] right-[-100px] w-[350px] h-[350px] rounded-full bg-white/5 blur-2xl" />
 
           <div className="relative z-10 text-center max-w-4xl mx-auto px-8">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur">
-                <Brain className="w-8 h-8 text-white" />
+            {/* Decorative top flourish */}
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="w-20 h-px bg-white/20" />
+              <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg shadow-white/5">
+                <Brain className="w-10 h-10 text-white" />
               </div>
+              <div className="w-20 h-px bg-white/20" />
             </div>
-            <h1 className="text-5xl font-bold mb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+
+            <h1 className="text-6xl font-bold mb-4 tracking-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               LiLy Stoica
             </h1>
-            <p className="text-xl text-white/80 mb-1">Neurocoach &amp; Clinical Hypnotherapist</p>
-            <p className="text-sm text-white/50 mb-8">CALM LILY LTD — Company No. 16832636</p>
+            <p className="text-2xl text-white/80 mb-1 font-light">Neurocoach &amp; Clinical Hypnotherapist</p>
+            <p className="text-sm text-white/40 mb-10">CALM LILY LTD — Company No. 16832636</p>
 
-            <div className="w-24 h-px bg-white/30 mx-auto mb-8" />
+            <div className="flex items-center justify-center gap-3 mb-10">
+              <div className="w-8 h-px bg-white/20" />
+              <Sparkles className="w-4 h-4 text-white/30" />
+              <div className="w-8 h-px bg-white/20" />
+            </div>
 
-            <h2 className="text-2xl font-semibold mb-2">Digital Platform Showcase</h2>
-            <p className="text-white/70 text-base mb-10">
+            <h2 className="text-3xl font-semibold mb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Digital Platform Showcase</h2>
+            <p className="text-white/60 text-lg mb-12 max-w-xl mx-auto leading-relaxed">
               Complete coaching platform — website, booking system, client portal, admin panel, video conferencing &amp; resource library.
             </p>
 
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto text-left">
-              {DEMO_USERS.map(u => (
-                <div key={u.role} className="flex items-center gap-3 bg-white/10 backdrop-blur rounded-lg px-4 py-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: u.colourHex }}>
-                    {u.role === "admin" ? "A" : "C"}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium capitalize">{u.role}</p>
-                    <p className="text-[10px] text-white/50">{u.email}</p>
-                    {tokens[u.role] ? (
-                      <span className="text-[9px] text-emerald-300 flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5" /> Authenticated</span>
-                    ) : authDone ? (
-                      <span className="text-[9px] text-red-300">Auth failed</span>
-                    ) : (
-                      <span className="text-[9px] text-white/40 flex items-center gap-1"><Loader2 className="w-2.5 h-2.5 animate-spin" /> Logging in...</span>
-                    )}
-                  </div>
+            {/* Feature highlights instead of credentials */}
+            <div className="grid grid-cols-4 gap-3 max-w-2xl mx-auto mb-12">
+              {[
+                { icon: Globe, label: "Website" },
+                { icon: Calendar, label: "Bookings" },
+                { icon: Users, label: "Client Portal" },
+                { icon: Video, label: "Video Calls" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex flex-col items-center gap-2 bg-white/5 backdrop-blur-sm rounded-xl px-3 py-4 border border-white/10">
+                  <Icon className="w-5 h-5 text-white/70" />
+                  <span className="text-[11px] text-white/50 font-medium">{label}</span>
                 </div>
               ))}
             </div>
 
-            {!authDone && (
-              <div className="mt-6 w-48 mx-auto">
-                <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-white/70 rounded-full transition-all duration-500" style={{ width: `${authProgress}%` }} />
-                </div>
-                <p className="text-[10px] text-white/40 mt-1">Authenticating demo accounts...</p>
-              </div>
-            )}
-
-            <div className="mt-10 text-xs text-white/30 space-y-1">
+            <div className="text-xs text-white/30 space-y-1">
               <p>Digital Boost Mentorship Programme</p>
-              <p>28 February 2025</p>
+              <p>28 February 2026</p>
             </div>
           </div>
 
@@ -279,13 +270,7 @@ export default function Showcase() {
               </div>
             </div>
 
-            <div className="mt-8 flex items-center gap-6 text-xs text-gray-400">
-              <span>lilystoica.com</span>
-              <span>•</span>
-              <span>lily.perennix.io (preview)</span>
-              <span>•</span>
-              <span>Custom VPS: Docker + Nginx</span>
-            </div>
+
           </div>
         </div>
 
@@ -338,25 +323,36 @@ export default function Showcase() {
         </div>
 
         {/* ── PAGE ENTRIES ────────────────────────────────────────────── */}
-        {PAGES.map((entry, i) => {
+        {(() => {
           let currentSection = "";
-          const showSection = entry.sectionLabel && entry.sectionLabel !== currentSection;
-          if (entry.sectionLabel) currentSection = entry.sectionLabel;
+          return PAGES.map((entry, i) => {
+            const showSection = !!(entry.sectionLabel && entry.sectionLabel !== currentSection);
+            if (entry.sectionLabel) currentSection = entry.sectionLabel;
 
-          return (
-            <div key={i}>
-              {/* Section divider */}
-              {showSection && (
-                <div className="sc-page sc-section-divider flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #2D3340 0%, #418F6C 100%)" }}>
-                  <div className="text-center text-white">
-                    <span className="text-5xl mb-4 block">{entry.sectionIcon}</span>
-                    <h2 className="text-4xl font-bold" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                      {entry.sectionLabel}
-                    </h2>
+            return (
+              <div key={i}>
+                {/* Section divider */}
+                {showSection && (
+                  <div className="sc-page sc-section-divider relative flex items-center justify-center overflow-hidden"
+                    style={{ background: "linear-gradient(135deg, #2D3340 0%, #418F6C 60%, #D4937A 100%)" }}>
+                    {/* Decorative circles */}
+                    <div className="absolute top-[-60px] left-[-60px] w-[250px] h-[250px] rounded-full bg-white/5 blur-2xl" />
+                    <div className="absolute bottom-[-40px] right-[-80px] w-[300px] h-[300px] rounded-full bg-white/5 blur-2xl" />
+                    <div className="relative z-10 text-center text-white">
+                      <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6 border border-white/10">
+                        <span className="text-4xl">{entry.sectionIcon}</span>
+                      </div>
+                      <h2 className="text-5xl font-bold mb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                        {entry.sectionLabel}
+                      </h2>
+                      <div className="flex items-center justify-center gap-3 mt-4">
+                        <div className="w-12 h-px bg-white/20" />
+                        <Sparkles className="w-4 h-4 text-white/30" />
+                        <div className="w-12 h-px bg-white/20" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Page entry */}
               <div className={`sc-page sc-entry ${entry.fullPage ? "sc-entry-full" : ""}`}>
@@ -426,43 +422,43 @@ export default function Showcase() {
               </div>
             </div>
           );
-        })}
+          });
+        })()}
 
         {/* ── CLOSING PAGE ───────────────────────────────────────────── */}
         <div className="sc-page sc-cover relative overflow-hidden flex flex-col items-center justify-center text-white"
           style={{ background: "linear-gradient(135deg, #418F6C 0%, #2D3340 50%, #D4937A 100%)" }}>
           <div className="absolute top-[-100px] right-[-100px] w-[350px] h-[350px] rounded-full bg-white/5 blur-2xl" />
 
-          <div className="relative z-10 text-center max-w-3xl mx-auto px-8">
-            <Brain className="w-12 h-12 text-white/80 mx-auto mb-6" />
-            <h2 className="text-4xl font-bold mb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              Thank You
-            </h2>
-            <p className="text-lg text-white/70 mb-8">
-              A complete digital platform for neurocoaching & hypnotherapy.
-            </p>
+          <div className="absolute top-[-80px] left-[-80px] w-[300px] h-[300px] rounded-full bg-white/5 blur-2xl" />
 
-            <div className="flex justify-center gap-8 mb-10">
-              {[
-                { num: "17+", label: "Pages" },
-                { num: "16", label: "Database Models" },
-                { num: "3", label: "Session Types" },
-                { num: "6", label: "Admin Tabs" },
-              ].map(({ num, label }) => (
-                <div key={label} className="text-center">
-                  <p className="text-3xl font-bold">{num}</p>
-                  <p className="text-xs text-white/50">{label}</p>
-                </div>
-              ))}
+          <div className="relative z-10 text-center max-w-3xl mx-auto px-8">
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="w-16 h-px bg-white/20" />
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/15">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <div className="w-16 h-px bg-white/20" />
             </div>
 
-            <div className="w-16 h-px bg-white/30 mx-auto mb-6" />
-
-            <p className="text-sm text-white/50">
-              Built with ❤️ as part of the Digital Boost mentorship programme
+            <h2 className="text-5xl font-bold mb-4" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              Thank You
+            </h2>
+            <p className="text-xl text-white/60 mb-10 max-w-md mx-auto leading-relaxed">
+              A complete digital platform for neurocoaching &amp; hypnotherapy.
             </p>
-            <p className="text-xs text-white/30 mt-2">
-              lilystoica.com • CALM LILY LTD • February 2025
+
+            <div className="flex items-center justify-center gap-3 mb-10">
+              <div className="w-8 h-px bg-white/20" />
+              <Sparkles className="w-4 h-4 text-white/30" />
+              <div className="w-8 h-px bg-white/20" />
+            </div>
+
+            <p className="text-lg text-white/50 font-light" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              LiLy Stoica — CALM LILY LTD
+            </p>
+            <p className="text-sm text-white/30 mt-2">
+              Digital Boost Mentorship Programme • February 2026
             </p>
           </div>
         </div>

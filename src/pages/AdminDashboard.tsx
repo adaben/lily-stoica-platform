@@ -22,9 +22,13 @@ import {
 } from "@/lib/api";
 
 type Tab = "bookings" | "schedule" | "blog" | "events" | "resources" | "settings";
+const VALID_TABS: Tab[] = ["bookings", "schedule", "blog", "events", "resources", "settings"];
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState<Tab>("bookings");
+  const [tab, setTab] = useState<Tab>(() => {
+    const p = new URLSearchParams(window.location.search).get("tab");
+    return p && VALID_TABS.includes(p as Tab) ? (p as Tab) : "bookings";
+  });
 
   return (
     <>

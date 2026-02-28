@@ -194,7 +194,7 @@ export default function Index() {
               </motion.div>
             </div>
 
-            {/* Hero visual — animated orbiting circle */}
+            {/* Hero visual — animated brain illustration */}
             <motion.div
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -202,27 +202,105 @@ export default function Index() {
               className="relative flex justify-center lg:justify-end"
             >
               <div className="relative w-80 h-80 lg:w-[440px] lg:h-[440px]">
-                {/* Outer ring */}
+                {/* Outer rotating ring */}
                 <motion.div
                   className="absolute inset-0 rounded-full border-2 border-dashed border-primary/10"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                 />
-                {/* Middle glow ring */}
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/10 to-lily-warm/10 animate-glow" />
-                {/* Inner content */}
-                <div className="absolute inset-8 rounded-full bg-gradient-to-tr from-primary/5 to-accent/20 flex items-center justify-center backdrop-blur-sm">
-                  <div className="text-center space-y-4">
+                {/* Secondary reverse ring */}
+                <motion.div
+                  className="absolute inset-3 rounded-full border border-primary/5"
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+                />
+                {/* Glow pulse */}
+                <div className="absolute inset-6 rounded-full bg-gradient-to-br from-primary/10 to-lily-warm/10 animate-glow" />
+                {/* Neural particle dots — orbiting */}
+                {[0, 60, 120, 180, 240, 300].map((deg, idx) => (
+                  <motion.div
+                    key={deg}
+                    className="absolute w-2 h-2 rounded-full bg-primary/40"
+                    style={{ top: "50%", left: "50%", transformOrigin: `0 ${idx % 2 === 0 ? 160 : 190}px` }}
+                    animate={{ rotate: [deg, deg + 360] }}
+                    transition={{ duration: 20 + idx * 3, repeat: Infinity, ease: "linear" }}
+                  />
+                ))}
+                {/* Inner content circle */}
+                <div className="absolute inset-10 rounded-full bg-gradient-to-tr from-primary/5 via-accent/10 to-lily-warm/5 flex items-center justify-center backdrop-blur-sm shadow-inner">
+                  <div className="text-center space-y-3">
+                    {/* Animated detailed brain SVG */}
                     <motion.div
                       animate={{ y: [-4, 4, -4] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="relative"
                     >
-                      <Brain className="w-20 h-20 text-primary mx-auto drop-shadow-sm" />
+                      <svg viewBox="0 0 120 120" className="w-24 h-24 lg:w-28 lg:h-28 mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        {/* Neural glow background */}
+                        <defs>
+                          <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="#418F6C" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#418F6C" stopOpacity="0" />
+                          </radialGradient>
+                          <linearGradient id="brainGrad" x1="20" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                            <stop stopColor="#418F6C" />
+                            <stop offset="1" stopColor="#2D6B52" />
+                          </linearGradient>
+                        </defs>
+                        <circle cx="60" cy="60" r="55" fill="url(#brainGlow)" />
+                        {/* Left hemisphere */}
+                        <path d="M58 30 C48 28, 32 34, 30 48 C28 58, 32 68, 36 74 C38 78, 34 84, 38 88 C42 92, 52 90, 56 88 L58 58 Z"
+                          stroke="url(#brainGrad)" strokeWidth="2" fill="#418F6C" fillOpacity="0.08" strokeLinecap="round">
+                          <animate attributeName="fill-opacity" values="0.08;0.15;0.08" dur="3s" repeatCount="indefinite" />
+                        </path>
+                        {/* Right hemisphere */}
+                        <path d="M62 30 C72 28, 88 34, 90 48 C92 58, 88 68, 84 74 C82 78, 86 84, 82 88 C78 92, 68 90, 64 88 L62 58 Z"
+                          stroke="url(#brainGrad)" strokeWidth="2" fill="#418F6C" fillOpacity="0.08" strokeLinecap="round">
+                          <animate attributeName="fill-opacity" values="0.08;0.15;0.08" dur="3s" begin="0.3s" repeatCount="indefinite" />
+                        </path>
+                        {/* Brain folds — left */}
+                        <path d="M40 42 C46 40, 50 44, 48 50" stroke="#418F6C" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+                        <path d="M34 56 C40 52, 48 56, 44 62" stroke="#418F6C" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+                        <path d="M38 70 C44 66, 50 70, 48 76" stroke="#418F6C" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+                        {/* Brain folds — right */}
+                        <path d="M80 42 C74 40, 70 44, 72 50" stroke="#418F6C" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+                        <path d="M86 56 C80 52, 72 56, 76 62" stroke="#418F6C" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+                        <path d="M82 70 C76 66, 70 70, 72 76" stroke="#418F6C" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+                        {/* Central divide + stem */}
+                        <line x1="60" y1="30" x2="60" y2="88" stroke="#418F6C" strokeWidth="1.5" opacity="0.3" />
+                        <path d="M56 88 C56 96, 60 100, 60 104 C60 100, 64 96, 64 88" stroke="#418F6C" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+                        {/* Neural pulse dots */}
+                        <circle cx="44" cy="46" r="2" fill="#418F6C" opacity="0.6">
+                          <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+                          <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="76" cy="46" r="2" fill="#418F6C" opacity="0.6">
+                          <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                          <animate attributeName="r" values="2;3;2" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="60" cy="60" r="2.5" fill="#D4937A" opacity="0.7">
+                          <animate attributeName="opacity" values="0.7;1;0.7" dur="1.5s" repeatCount="indefinite" />
+                          <animate attributeName="r" values="2.5;3.5;2.5" dur="1.5s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="40" cy="68" r="1.5" fill="#418F6C" opacity="0.5">
+                          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" begin="1s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="80" cy="68" r="1.5" fill="#418F6C" opacity="0.5">
+                          <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" begin="1.5s" repeatCount="indefinite" />
+                        </circle>
+                        {/* Neural connection lines */}
+                        <line x1="44" y1="46" x2="60" y2="60" stroke="#418F6C" strokeWidth="0.5" opacity="0.2">
+                          <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite" />
+                        </line>
+                        <line x1="76" y1="46" x2="60" y2="60" stroke="#418F6C" strokeWidth="0.5" opacity="0.2">
+                          <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                        </line>
+                      </svg>
                     </motion.div>
                     <p className="font-cormorant text-2xl lg:text-3xl font-bold text-foreground">
                       Feed Your Brain
                     </p>
-                    <p className="text-sm text-muted-foreground px-6">
+                    <p className="text-xs text-muted-foreground px-4">
                       Nervous system regulation, metabolism reset, somatic healing
                     </p>
                   </div>
