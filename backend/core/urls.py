@@ -26,7 +26,10 @@ urlpatterns = [
     # Bookings (admin)
     path("admin/bookings/", bookings.admin_all_bookings, name="admin-all-bookings"),
     path("admin/bookings/<int:booking_id>/confirm/", bookings.admin_confirm_booking, name="admin-confirm-booking"),
+    path("admin/bookings/slots/", bookings.admin_list_slots, name="admin-list-slots"),
     path("admin/bookings/slots/create/", bookings.admin_create_slot, name="admin-create-slot"),
+    path("admin/bookings/slots/bulk/", bookings.admin_bulk_create_slots, name="admin-bulk-create-slots"),
+    path("admin/bookings/slots/<int:slot_id>/delete/", bookings.admin_delete_slot, name="admin-delete-slot"),
 
     # Testimonials
     path("testimonials/", testimonials.list_testimonials, name="list-testimonials"),

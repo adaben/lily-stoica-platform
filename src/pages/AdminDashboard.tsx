@@ -5,6 +5,7 @@ import {
   Calendar, Settings, Loader2, Clock,
   Brain, Bell, FileText, CalendarDays,
   Plus, Pencil, Trash2, Eye, EyeOff, Pin, BookOpen, X,
+  Repeat,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -12,13 +13,14 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import {
   apiGetAllBookings, apiConfirmBooking, apiCreateSlot,
+  apiGetAdminSlots, apiDeleteSlot, apiCreateRecurringSlots,
   apiGetSettings, apiUpdateSettings, apiTestGemini,
   apiAdminGetBlogPosts, apiAdminCreateBlogPost, apiAdminUpdateBlogPost,
   apiAdminDeleteBlogPost, apiAdminToggleBlogPost,
   apiAdminGetEvents, apiAdminCreateEvent, apiAdminUpdateEvent, apiAdminDeleteEvent,
   apiAdminGetResources, apiAdminCreateResource, apiAdminUpdateResource, apiAdminDeleteResource,
   apiGetResourceCategories,
-  type Booking, type BlogPost, type Event, type Resource, type ResourceCategory,
+  type Booking, type BlogPost, type Event, type Resource, type ResourceCategory, type BookingSlot,
 } from "@/lib/api";
 
 type Tab = "bookings" | "schedule" | "blog" | "events" | "resources" | "settings";
@@ -147,11 +149,32 @@ function BookingsPanel() {
 }
 
 function SchedulePanel() {
+  const qc = useQueryClient();
+  const { data: slotsData, isLoading: slotsLoading } = useQuery({
+    queryKey: ["admin-slots"],
+    queryFn: apiGetAdminSlots,
+  });
+
+  // Single slot creation state
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
   const [sessionType, setSessionType] = useState("standard");
   const [loading, setLoading] = useState(false);
+
+  // Recurring slot creation state
+  const [showRecurring, setShowRecurring] = useState(false);
+  const [rStartDate, setRStartDate] = useState("");
+  const [rEndDate, setREndDate] = useState("");
+  const [rWeekdays, setRWeekdays] = useState<number[]>([]);
+  const [rStartTime, setRStartTime] = useState("09:00");
+  const [rEndTime, setREndTime] = useState("10:00");
+  const [rSessionType, setRSessionType] = useState("standard");
+  const [rLoading, setRLoading] = useState(false);
+
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const slots = slotsData?.results || [];
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,6 +189,7 @@ function SchedulePanel() {
       });
       toast.success("Slot created.");
       setDate("");
+      qc.invalidateQueries({ queryKey: ["admin-slots"] });
     } catch {
       toast.error("Could not create slot.");
     } finally {
@@ -173,63 +197,295 @@ function SchedulePanel() {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    setDeletingId(id);
+    try {
+      await apiDeleteSlot(id);
+      toast.success("Slot deleted.");
+      qc.invalidateQueries({ queryKey: ["admin-slots"] });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not delete slot.";
+      toast.error(msg);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const toggleWeekday = (day: number) => {
+    setRWeekdays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
+
+  const handleRecurringCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rWeekdays.length === 0) {
+      toast.error("Select at least one weekday.");
+      return;
+    }
+    setRLoading(true);
+    try {
+      const res = await apiCreateRecurringSlots({
+        start_date: rStartDate,
+        end_date: rEndDate,
+        weekdays: rWeekdays,
+        start_time: rStartTime,
+        end_time: rEndTime,
+        session_type: rSessionType,
+      });
+      toast.success(`${res.created_count} slot(s) created.`);
+      setRStartDate("");
+      setREndDate("");
+      setRWeekdays([]);
+      qc.invalidateQueries({ queryKey: ["admin-slots"] });
+    } catch {
+      toast.error("Could not create recurring slots.");
+    } finally {
+      setRLoading(false);
+    }
+  };
+
+  const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const SESSION_LABELS: Record<string, string> = {
+    discovery: "Discovery",
+    standard: "Standard",
+    intensive: "Intensive",
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-border/60 p-6 max-w-lg">
-      <h2 className="text-xl font-cormorant font-bold text-foreground mb-4">Add Available Slot</h2>
-      <form onSubmit={handleCreate} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Start time</label>
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
+    <div className="space-y-8">
+      {/* ── Existing Slots List ── */}
+      <div className="bg-white rounded-2xl border border-border/60 p-6">
+        <h2 className="text-xl font-cormorant font-bold text-foreground mb-4">
+          Upcoming Slots
+        </h2>
+        {slotsLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">End time</label>
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              required
-              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
+        ) : slots.length === 0 ? (
+          <p className="text-muted-foreground text-sm py-6 text-center">
+            No upcoming slots. Create one below.
+          </p>
+        ) : (
+          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+            {slots.map((slot: BookingSlot) => (
+              <div
+                key={slot.id}
+                className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/40 bg-accent/10 hover:bg-accent/20 transition-colors"
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <CalendarDays className="w-4 h-4 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      {format(new Date(slot.date), "EEE d MMM yyyy")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {slot.start_time?.slice(0, 5)} – {slot.end_time?.slice(0, 5)}
+                      {" · "}
+                      <span className="capitalize">{SESSION_LABELS[slot.session_type] || slot.session_type}</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span
+                    className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                      slot.is_available
+                        ? "bg-green-100 text-green-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {slot.is_available ? "Available" : "Booked"}
+                  </span>
+                  <button
+                    onClick={() => handleDelete(slot.id)}
+                    disabled={deletingId === slot.id}
+                    title={slot.is_available ? "Delete slot" : "Cannot delete booked slot"}
+                    className="p-1.5 text-muted-foreground hover:text-red-600 disabled:opacity-40 transition-colors rounded-lg hover:bg-red-50"
+                  >
+                    {deletingId === slot.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* ── Single Slot Creation ── */}
+        <div className="bg-white rounded-2xl border border-border/60 p-6">
+          <h2 className="text-xl font-cormorant font-bold text-foreground mb-4 flex items-center gap-2">
+            <Plus className="w-5 h-5 text-primary" />
+            Add Single Slot
+          </h2>
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Start</label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  required
+                  className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">End</label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  required
+                  className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Type</label>
+              <select
+                value={sessionType}
+                onChange={(e) => setSessionType(e.target.value)}
+                className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                <option value="discovery">Discovery call</option>
+                <option value="standard">Standard session</option>
+                <option value="intensive">Intensive session</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-primary text-primary-foreground font-medium rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              Create Slot
+            </button>
+          </form>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Session type</label>
-          <select
-            value={sessionType}
-            onChange={(e) => setSessionType(e.target.value)}
-            className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+
+        {/* ── Recurring Slot Creation ── */}
+        <div className="bg-white rounded-2xl border border-border/60 p-6">
+          <button
+            type="button"
+            onClick={() => setShowRecurring(!showRecurring)}
+            className="flex items-center gap-2 text-xl font-cormorant font-bold text-foreground mb-4 w-full text-left"
           >
-            <option value="discovery">Discovery call</option>
-            <option value="standard">Standard session</option>
-            <option value="intensive">Intensive session</option>
-          </select>
+            <Repeat className="w-5 h-5 text-primary" />
+            Recurring Slots
+            <span className="ml-auto text-sm font-sans font-normal text-primary">
+              {showRecurring ? "Hide" : "Show"}
+            </span>
+          </button>
+
+          {showRecurring && (
+            <form onSubmit={handleRecurringCreate} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">From</label>
+                  <input
+                    type="date"
+                    value={rStartDate}
+                    onChange={(e) => setRStartDate(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">To</label>
+                  <input
+                    type="date"
+                    value={rEndDate}
+                    onChange={(e) => setREndDate(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Weekdays</label>
+                <div className="flex flex-wrap gap-2">
+                  {WEEKDAY_LABELS.map((label, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => toggleWeekday(idx)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                        rWeekdays.includes(idx)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-muted-foreground border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Start</label>
+                  <input
+                    type="time"
+                    value={rStartTime}
+                    onChange={(e) => setRStartTime(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">End</label>
+                  <input
+                    type="time"
+                    value={rEndTime}
+                    onChange={(e) => setREndTime(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Type</label>
+                <select
+                  value={rSessionType}
+                  onChange={(e) => setRSessionType(e.target.value)}
+                  className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  <option value="discovery">Discovery call</option>
+                  <option value="standard">Standard session</option>
+                  <option value="intensive">Intensive session</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                disabled={rLoading || rWeekdays.length === 0}
+                className="w-full py-2.5 bg-primary text-primary-foreground font-medium rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {rLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                Create Recurring Slots
+              </button>
+            </form>
+          )}
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 bg-primary text-primary-foreground font-medium rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          Create Slot
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

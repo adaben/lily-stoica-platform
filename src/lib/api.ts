@@ -337,6 +337,27 @@ export const apiCreateSlot = (data: Partial<BookingSlot>) =>
     body: JSON.stringify(data),
   });
 
+export const apiGetAdminSlots = () =>
+  apiFetch<PaginatedResponse<BookingSlot>>("/admin/bookings/slots/");
+
+export const apiDeleteSlot = (id: number) =>
+  apiFetch<void>(`/admin/bookings/slots/${id}/delete/`, { method: "DELETE" });
+
+export interface BulkSlotPayload {
+  start_date: string;
+  end_date: string;
+  weekdays: number[];
+  start_time: string;
+  end_time: string;
+  session_type: string;
+}
+
+export const apiCreateRecurringSlots = (data: BulkSlotPayload) =>
+  apiFetch<{ created_count: number; slots: BookingSlot[] }>("/admin/bookings/slots/bulk/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
 /* ── Testimonials ── */
 
 export const apiGetTestimonials = () =>
