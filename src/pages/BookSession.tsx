@@ -33,7 +33,13 @@ export default function BookSession() {
 
   const handleBook = async () => {
     if (!isAuthenticated) {
-      navigate("/register");
+      navigate("/register", {
+        state: {
+          pendingBooking: selectedSlot
+            ? { slotId: selectedSlot.id, sessionType: selectedType, notes }
+            : undefined,
+        },
+      });
       return;
     }
     if (!selectedSlot) return;

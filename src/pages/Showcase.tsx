@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
-  Loader2, Printer, Brain, Video,
+  Loader2, Printer, Brain, Video, Bot,
   Shield, Users, Calendar, BookOpen, BarChart3, MessageSquare,
   Sparkles, Globe, Monitor, Layout, ChevronRight,
 } from "lucide-react";
@@ -72,6 +72,9 @@ const PAGES: ShowcaseEntry[] = [
 
   /* ── Video Conferencing ─────────────────────────────────────────────── */
   { sectionLabel: "Video Conferencing", sectionIcon: "📹", path: "", title: "Live Video Sessions", description: "WebRTC peer-to-peer video conferencing built into the platform. Camera/mic toggle, screen sharing, fullscreen mode, draggable PiP self-view, connection status indicators. Accessible directly from the dashboard for confirmed bookings.", role: "public" },
+
+  /* ── AI Assistant ───────────────────────────────────────────────────── */
+  { sectionLabel: "AI Assistant", sectionIcon: "🤖", path: "", title: "Gemini-Powered AI Chatbot", description: "Intelligent AI assistant trained exclusively on site content — services, pricing, qualifications, events. Rate-limited (5/min, 50/day). Admin-configurable system prompt, API key, and token limits. Accessible from every page via floating chat widget.", role: "public" },
 
   /* ── Legal ──────────────────────────────────────────────────────────── */
   { sectionLabel: "Legal & Compliance", sectionIcon: "📋", path: "/privacy", title: "Privacy Policy", description: "GDPR-compliant privacy policy covering data collection, processing, and user rights.", role: "public" },
@@ -386,6 +389,37 @@ export default function Showcase() {
                         <Loader2 className="w-8 h-8 animate-spin text-primary/40" />
                       </div>
                     )}
+                  </div>
+                ) : entry.sectionLabel === "AI Assistant" ? (
+                  /* AI Assistant description card */
+                  <div className="flex-1 flex items-center justify-center bg-gray-900 rounded-lg p-8 text-white">
+                    <div className="text-center max-w-lg">
+                      <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
+                        <Bot className="w-10 h-10 text-primary" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-4" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                        AI-Powered Assistant
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 text-left mb-6">
+                        {[
+                          { icon: MessageSquare, label: "Floating Chat Widget" },
+                          { icon: Brain, label: "Gemini 2.0 Flash" },
+                          { icon: Shield, label: "Rate Limited (5/min)" },
+                          { icon: BookOpen, label: "Site-Content Only" },
+                        ].map(({ icon: Icon, label }) => (
+                          <div key={label} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                            <Icon className="w-4 h-4 text-primary" />
+                            <span className="text-sm">{label}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-sm text-white/60">
+                        Vertex AI (Gemini) • Admin-configurable prompt &amp; API key • Markdown-rendered responses
+                      </p>
+                      <p className="text-xs text-white/40 mt-2">
+                        Answers about services, pricing, qualifications — refuses off-topic queries
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   /* Video conferencing description card */

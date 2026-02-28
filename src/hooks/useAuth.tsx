@@ -22,6 +22,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    /* Showcase injects ?_st=TOKEN into iframe URLs — pick it up */
+    const params = new URLSearchParams(window.location.search);
+    const showcaseToken = params.get("_st");
+    if (showcaseToken) {
+      localStorage.setItem("lily_access_token", showcaseToken);
+      /* Clean the URL so tokens don't leak in history */
+      params.delete("_st");
+      params.delete("_showcase");
+      const clean = params.toString();
+      const base = window.location.pathname + (clean ? `?${clean}` : "");
+      window.history.replaceState({}, "", base);
+    }
+
     const token = getAccessToken();
     if (token) {
       apiGetMe()

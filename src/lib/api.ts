@@ -314,7 +314,7 @@ export const apiGetAvailableSlots = (sessionType?: string) =>
 export const apiCreateBooking = (slotId: number, sessionType: string, notes?: string) =>
   apiFetch<Booking>("/bookings/create/", {
     method: "POST",
-    body: JSON.stringify({ slot: slotId, session_type: sessionType, notes }),
+    body: JSON.stringify({ slot_id: slotId, session_type: sessionType, notes }),
   });
 
 export const apiGetMyBookings = () =>

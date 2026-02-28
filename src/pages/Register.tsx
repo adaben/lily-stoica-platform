@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Loader2, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { apiCreateBooking } from "@/lib/api";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pendingBooking = (location.state as { pendingBooking?: { slotId: number; sessionType: string; notes: string } })?.pendingBooking;
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -33,7 +36,16 @@ export default function Register() {
     setLoading(true);
     try {
       await register(form);
-      toast.success("Account created successfully.");
+      if (pendingBooking) {
+        try {
+          await apiCreateBooking(pendingBooking.slotId, pendingBooking.sessionType, pendingBooking.notes);
+          toast.success("Account created and session booked!");
+        } catch {
+          toast.success("Account created. Please book your session again.");
+        }
+      } else {
+        toast.success("Account created successfully.");
+      }
       navigate("/dashboard");
     } catch {
       toast.error("Registration failed. Please check your details and try again.");
@@ -59,7 +71,9 @@ export default function Register() {
             </Link>
             <h1 className="text-3xl font-cormorant font-bold text-foreground">Create Your Account</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Register to book sessions and manage your appointments
+              {pendingBooking
+                ? "Complete your registration to confirm your booking"
+                : "Register to book sessions and manage your appointments"}
             </p>
           </div>
 
@@ -181,7 +195,7 @@ export default function Register() {
               className="w-full py-3 bg-primary text-primary-foreground font-medium rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Create Account
+              {pendingBooking ? "Create Account & Book" : "Create Account"}
             </button>
           </form>
 
