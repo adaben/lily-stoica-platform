@@ -102,3 +102,40 @@ html {
 .showcase-mode [data-showcase-hide] {
   display: none !important;
 }
+/* ── Showcase & Print: force all framer-motion elements visible ────────── */
+/* Framer-motion applies opacity/transform via inline style, but Chrome's
+   print renderer sometimes snapshots elements before the JS-applied
+   values are painted. Force everything visible for showcase + print.     */
+.showcase-mode [style*="opacity"],
+.showcase-mode [style*="transform"] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Keep intentional scale/rotate animations on continuous-animation elements */
+.showcase-mode .animate-float,
+.showcase-mode .animate-glow,
+.showcase-mode .animate-gentle-pulse {
+  animation: none !important;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force every element visible — framer-motion inline styles are unreliable in print */
+  [style*="opacity"] {
+    opacity: 1 !important;
+  }
+  [style*="transform"] {
+    transform: none !important;
+  }
+
+  /* Kill CSS animations for clean static output */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
