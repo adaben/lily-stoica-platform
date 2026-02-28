@@ -32,11 +32,20 @@ export default function Blog() {
   return (
     <>
       <Helmet>
-        <title>Blog | Calm Lily - Neurocoach and Hypnotherapist</title>
-        <meta
-          name="description"
-          content="Articles on neuroscience, hypnotherapy, addiction recovery, stress management and nervous system health by Lily Stoica."
-        />
+        <title>Blog | Calm Lily</title>
+        <meta name="description" content="Articles on neuroscience, hypnotherapy, addiction recovery, stress management and nervous system health by LiLy Stoica." />
+        <link rel="canonical" href="https://calm-lily.co.uk/blog" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Calm Lily" />
+        <meta property="og:locale" content="en_GB" />
+        <meta property="og:title" content="Blog | Calm Lily" />
+        <meta property="og:description" content="Articles on neuroscience, hypnotherapy, addiction recovery, stress management and nervous system health by LiLy Stoica." />
+        <meta property="og:url" content="https://calm-lily.co.uk/blog" />
+        <meta property="og:image" content="https://calm-lily.co.uk/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Blog | Calm Lily" />
+        <meta name="twitter:description" content="Articles on neuroscience, hypnotherapy, addiction recovery, stress management and nervous system health." />
+        <meta name="twitter:image" content="https://calm-lily.co.uk/og-image.png" />
       </Helmet>
 
       <SiteHeader />

@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://lilystoica.com/sitemap.xml
+Sitemap: https://calm-lily.co.uk/sitemap.xml

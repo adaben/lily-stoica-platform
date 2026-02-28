@@ -6,8 +6,9 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy | LiLy Stoica</title>
-        <meta name="description" content="Privacy policy for LiLy Stoica neurocoaching and hypnotherapy services." />
+        <title>Privacy Policy | Calm Lily</title>
+        <meta name="description" content="Privacy policy for Calm Lily neurocoaching and hypnotherapy services." />
+        <link rel="canonical" href="https://calm-lily.co.uk/privacy" />
       </Helmet>
 
       <SiteHeader />

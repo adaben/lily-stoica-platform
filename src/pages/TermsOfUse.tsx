@@ -6,8 +6,9 @@ export default function TermsOfUse() {
   return (
     <>
       <Helmet>
-        <title>Terms of Use | LiLy Stoica</title>
-        <meta name="description" content="Terms of use for LiLy Stoica neurocoaching and hypnotherapy platform." />
+        <title>Terms of Use | Calm Lily</title>
+        <meta name="description" content="Terms of use for Calm Lily neurocoaching and hypnotherapy platform." />
+        <link rel="canonical" href="https://calm-lily.co.uk/terms" />
       </Helmet>
 
       <SiteHeader />

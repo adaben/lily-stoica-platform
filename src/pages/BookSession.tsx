@@ -88,10 +88,19 @@ export default function BookSession() {
     <>
       <Helmet>
         <title>Book a Session | Calm Lily</title>
-        <meta
-          name="description"
-          content="Book a free discovery call or schedule a neurocoaching, hypnotherapy or addiction recovery session with Lily Stoica."
-        />
+        <meta name="description" content="Book a free discovery call or schedule a neurocoaching, hypnotherapy or addiction recovery session with LiLy Stoica." />
+        <link rel="canonical" href="https://calm-lily.co.uk/book" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Calm Lily" />
+        <meta property="og:locale" content="en_GB" />
+        <meta property="og:title" content="Book a Session | Calm Lily" />
+        <meta property="og:description" content="Book a free discovery call or schedule a neurocoaching, hypnotherapy or addiction recovery session with LiLy Stoica." />
+        <meta property="og:url" content="https://calm-lily.co.uk/book" />
+        <meta property="og:image" content="https://calm-lily.co.uk/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Book a Session | Calm Lily" />
+        <meta name="twitter:description" content="Book a free discovery call or schedule a session with LiLy Stoica." />
+        <meta name="twitter:image" content="https://calm-lily.co.uk/og-image.png" />
       </Helmet>
 
       <SiteHeader />

@@ -190,11 +190,20 @@ export default function Services() {
   return (
     <>
       <Helmet>
-        <title>Services | Calm Lily - Neurocoach and Hypnotherapist</title>
-        <meta
-          name="description"
-          content="Neurocoaching, hypnotherapy, addiction recovery, nervous system regulation and burnout prevention. View services and pricing."
-        />
+        <title>Services &amp; Pricing | Calm Lily</title>
+        <meta name="description" content="Neurocoaching, hypnotherapy, addiction recovery, nervous system regulation and burnout prevention. View services and pricing." />
+        <link rel="canonical" href="https://calm-lily.co.uk/services" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Calm Lily" />
+        <meta property="og:locale" content="en_GB" />
+        <meta property="og:title" content="Services &amp; Pricing | Calm Lily" />
+        <meta property="og:description" content="Neurocoaching, hypnotherapy, addiction recovery, nervous system regulation and burnout prevention. View services and pricing." />
+        <meta property="og:url" content="https://calm-lily.co.uk/services" />
+        <meta property="og:image" content="https://calm-lily.co.uk/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Services &amp; Pricing | Calm Lily" />
+        <meta name="twitter:description" content="Neurocoaching, hypnotherapy, addiction recovery, nervous system regulation and burnout prevention." />
+        <meta name="twitter:image" content="https://calm-lily.co.uk/og-image.png" />
       </Helmet>
 
       <SiteHeader />

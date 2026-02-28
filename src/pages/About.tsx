@@ -69,11 +69,20 @@ export default function About() {
   return (
     <>
       <Helmet>
-        <title>About Lily | Calm Lily - Neurocoach and Hypnotherapist</title>
-        <meta
-          name="description"
-          content="Learn about Lily Stoica's journey from careers adviser to neurocoach and hypnotherapist. Lived experience combined with professional accreditation."
-        />
+        <title>About Lily | Calm Lily</title>
+        <meta name="description" content="Learn about LiLy Stoica's journey from careers adviser to neurocoach and hypnotherapist. Lived experience combined with professional accreditation." />
+        <link rel="canonical" href="https://calm-lily.co.uk/about" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Calm Lily" />
+        <meta property="og:locale" content="en_GB" />
+        <meta property="og:title" content="About LiLy Stoica | Calm Lily" />
+        <meta property="og:description" content="Learn about LiLy Stoica's journey from careers adviser to neurocoach and hypnotherapist. Lived experience combined with professional accreditation." />
+        <meta property="og:url" content="https://calm-lily.co.uk/about" />
+        <meta property="og:image" content="https://calm-lily.co.uk/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="About LiLy Stoica | Calm Lily" />
+        <meta name="twitter:description" content="Learn about LiLy Stoica's journey from careers adviser to neurocoach and hypnotherapist." />
+        <meta name="twitter:image" content="https://calm-lily.co.uk/og-image.png" />
       </Helmet>
 
       <SiteHeader />

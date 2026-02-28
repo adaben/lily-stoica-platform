@@ -14,7 +14,7 @@ export default function VideoCallPage() {
   return (
     <>
       <Helmet>
-        <title>Video Session | LiLy Stoica</title>
+        <title>Video Session | Calm Lily</title>
       </Helmet>
       <VideoCallErrorBoundary onClose={() => navigate("/dashboard")}>
         <VideoCall bookingId={bookingId} onClose={() => navigate("/dashboard")} />

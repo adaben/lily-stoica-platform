@@ -16,11 +16,20 @@ export default function Events() {
   return (
     <>
       <Helmet>
-        <title>Events and Workshops | Calm Lily</title>
-        <meta
-          name="description"
-          content="In-person workshops and events in Balham, South West London. Feed Your Brain, Free Your Brain and more."
-        />
+        <title>Events &amp; Workshops | Calm Lily</title>
+        <meta name="description" content="In-person workshops and events in Balham, South West London. Feed Your Brain, Free Your Brain and more." />
+        <link rel="canonical" href="https://calm-lily.co.uk/events" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Calm Lily" />
+        <meta property="og:locale" content="en_GB" />
+        <meta property="og:title" content="Events &amp; Workshops | Calm Lily" />
+        <meta property="og:description" content="In-person workshops and events in Balham, South West London. Feed Your Brain, Free Your Brain and more." />
+        <meta property="og:url" content="https://calm-lily.co.uk/events" />
+        <meta property="og:image" content="https://calm-lily.co.uk/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Events &amp; Workshops | Calm Lily" />
+        <meta name="twitter:description" content="In-person workshops and events in Balham, South West London. Feed Your Brain, Free Your Brain and more." />
+        <meta name="twitter:image" content="https://calm-lily.co.uk/og-image.png" />
       </Helmet>
 
       <SiteHeader />

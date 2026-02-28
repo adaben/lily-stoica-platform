@@ -91,10 +91,21 @@ export default function Index() {
     <>
       <Helmet>
         <title>Calm Lily | Neurocoaching &amp; Hypnotherapy by LiLy Stoica</title>
-        <meta
-          name="description"
-          content="Professional neurocoaching and licensed hypnotherapy in Balham, South West London. Specialising in stress recovery, addiction support and nervous system regulation. Book a free discovery call."
-        />
+        <meta name="description" content="Professional neurocoaching and licensed hypnotherapy in Balham, South West London. Specialising in stress recovery, addiction support and nervous system regulation. Book a free discovery call." />
+        <link rel="canonical" href="https://calm-lily.co.uk/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Calm Lily" />
+        <meta property="og:locale" content="en_GB" />
+        <meta property="og:title" content="Calm Lily | Neurocoaching &amp; Hypnotherapy by LiLy Stoica" />
+        <meta property="og:description" content="Professional neurocoaching and licensed hypnotherapy in Balham, South West London. Specialising in stress recovery, addiction support and nervous system regulation." />
+        <meta property="og:url" content="https://calm-lily.co.uk/" />
+        <meta property="og:image" content="https://calm-lily.co.uk/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Calm Lily | Neurocoaching &amp; Hypnotherapy by LiLy Stoica" />
+        <meta name="twitter:description" content="Professional neurocoaching and licensed hypnotherapy in Balham, South West London. Specialising in stress recovery, addiction support and nervous system regulation." />
+        <meta name="twitter:image" content="https://calm-lily.co.uk/og-image.png" />
       </Helmet>
 
       <SiteHeader />

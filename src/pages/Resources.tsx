@@ -45,11 +45,20 @@ export default function Resources() {
   return (
     <>
       <Helmet>
-        <title>Resource Hub | Calm Lily - Neurocoach and Hypnotherapist</title>
-        <meta
-          name="description"
-          content="Free resources, guides, recordings and tools for mental health, nervous system regulation and addiction recovery by Lily Stoica."
-        />
+        <title>Resource Hub | Calm Lily</title>
+        <meta name="description" content="Free resources, guides, recordings and tools for mental health, nervous system regulation and addiction recovery by LiLy Stoica." />
+        <link rel="canonical" href="https://calm-lily.co.uk/resources" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Calm Lily" />
+        <meta property="og:locale" content="en_GB" />
+        <meta property="og:title" content="Resource Hub | Calm Lily" />
+        <meta property="og:description" content="Free resources, guides, recordings and tools for mental health, nervous system regulation and addiction recovery by LiLy Stoica." />
+        <meta property="og:url" content="https://calm-lily.co.uk/resources" />
+        <meta property="og:image" content="https://calm-lily.co.uk/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Resource Hub | Calm Lily" />
+        <meta name="twitter:description" content="Free resources, guides, recordings and tools for mental health, nervous system regulation and addiction recovery." />
+        <meta name="twitter:image" content="https://calm-lily.co.uk/og-image.png" />
       </Helmet>
 
       <SiteHeader />
