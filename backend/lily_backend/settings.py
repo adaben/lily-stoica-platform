@@ -157,6 +157,13 @@ CORS_ALLOWED_ORIGINS = os.getenv(
 ).split(",")
 CORS_ALLOW_CREDENTIALS = True
 
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:8081,http://127.0.0.1:8081"
+).split(",")
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8081")
+
 # ---------------------------------------------------------------------------
 # Static files
 # ---------------------------------------------------------------------------

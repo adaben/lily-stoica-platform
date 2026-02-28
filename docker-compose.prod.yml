@@ -42,10 +42,10 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
       DB_HOST: db
       DB_PORT: "5432"
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-lily.perennix.io,lilystoica.com,www.lilystoica.com,localhost,127.0.0.1,lily_backend,backend}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://lily.perennix.io,https://lilystoica.com}
-      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://lily.perennix.io,https://lilystoica.com}
-      FRONTEND_URL: ${FRONTEND_URL:-https://lily.perennix.io}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-lily.perennix.io,calm-lily.co.uk,www.calm-lily.co.uk,lilystoica.com,www.lilystoica.com,localhost,127.0.0.1,lily_backend,backend}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://lily.perennix.io,https://calm-lily.co.uk,https://www.calm-lily.co.uk,https://lilystoica.com}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://lily.perennix.io,https://calm-lily.co.uk,https://www.calm-lily.co.uk,https://lilystoica.com}
+      FRONTEND_URL: ${FRONTEND_URL:-https://calm-lily.co.uk}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     healthcheck:

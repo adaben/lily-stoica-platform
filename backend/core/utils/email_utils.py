@@ -7,11 +7,15 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+from django.conf import settings as dj_settings
 from ..models import SystemConfiguration
 
 logger = logging.getLogger("core")
 
 BRAND_COLOUR = "#4F8A6E"
+
+def _site_url():
+    return getattr(dj_settings, "FRONTEND_URL", "https://calm-lily.co.uk").rstrip("/")
 
 
 def _get_config():
@@ -73,7 +77,7 @@ def _wrap_html(title: str, body: str) -> str:
         <tr>
           <td style="padding:16px 24px;background:#f5f3f0;text-align:center;font-size:12px;color:#888;">
             Calm Lily Ltd &middot; Balham, London SW12<br />
-            <a href="https://lilystoica.com/privacy" style="color:{BRAND_COLOUR};">Privacy Policy</a>
+            <a href="{_site_url()}/privacy" style="color:{BRAND_COLOUR};">Privacy Policy</a>
           </td>
         </tr>
       </table>
@@ -135,7 +139,7 @@ def send_lead_magnet_delivery(entry):
       Here is your free Nervous System Reset audio recording:
     </p>
     <p style="text-align:center;margin:24px 0;">
-      <a href="https://lilystoica.com/resources/nervous-system-reset"
+      <a href="{_site_url()}/resources/nervous-system-reset"
          style="display:inline-block;background:{BRAND_COLOUR};color:#fff;
                 padding:12px 28px;border-radius:24px;text-decoration:none;
                 font-size:14px;font-weight:600;">
