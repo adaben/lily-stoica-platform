@@ -511,7 +511,46 @@ class SystemConfiguration(models.Model):
     blog_enabled = models.BooleanField(default=True)
     events_enabled = models.BooleanField(default=True)
     booking_enabled = models.BooleanField(default=True)
-    lead_magnet_enabled = models.BooleanField(default=True)
+    lead_magnet_enabled = models.BooleanField(default=False)
+
+    # Lead-magnet content (customisable from admin)
+    lead_magnet_title = models.CharField(
+        max_length=200,
+        default="Free Nervous System Reset Audio",
+        blank=True,
+    )
+    lead_magnet_description = models.TextField(
+        default=(
+            "Leave your details and receive a guided relaxation recording "
+            "enhanced with binaural beats, designed for stress relief and "
+            "better sleep."
+        ),
+        blank=True,
+    )
+    lead_magnet_button_text = models.CharField(
+        max_length=100,
+        default="Send Me the Recording",
+        blank=True,
+    )
+    lead_magnet_file = models.FileField(
+        upload_to="lead_magnet/",
+        blank=True,
+        null=True,
+        help_text="File that subscribers will receive (audio, PDF, etc.).",
+    )
+    lead_magnet_email_subject = models.CharField(
+        max_length=300,
+        default="Your free Nervous System Reset recording",
+        blank=True,
+    )
+    lead_magnet_email_body = models.TextField(
+        default=(
+            "Thank you for your interest in calming your nervous system.\n"
+            "Click the button below to download your free resource."
+        ),
+        blank=True,
+        help_text="Plain-text email body. The download link/button is appended automatically.",
+    )
 
     class Meta:
         verbose_name = "System configuration"

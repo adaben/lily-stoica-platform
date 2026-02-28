@@ -128,22 +128,39 @@ def send_booking_confirmation(booking):
     )
 
 
-def send_lead_magnet_delivery(entry):
-    """Send the free resource download link."""
+def send_lead_magnet_delivery(entry, config=None):
+    """Send the free resource download link using admin-configured content."""
+    from ..models import SystemConfiguration
+    if config is None:
+        config = SystemConfiguration.load()
+
+    # Build download URL — use uploaded file if available, else fallback
+    if config.lead_magnet_file:
+        download_url = f"{_site_url()}/api/media/{config.lead_magnet_file.name}"
+    else:
+        download_url = f"{_site_url()}/resources/nervous-system-reset"
+
+    # Email body paragraphs from admin setting (newlines → <p> tags)
+    email_text = config.lead_magnet_email_body or (
+        "Thank you for your interest in calming your nervous system.\n"
+        "Click the button below to download your free resource."
+    )
+    body_paragraphs = "\n".join(
+        f'    <p style="color:#444;font-size:14px;line-height:1.6;">{line}</p>'
+        for line in email_text.strip().split("\n") if line.strip()
+    )
+
     body = f"""
     <p style="color:#444;font-size:14px;line-height:1.6;">
       Hello {entry.first_name},
     </p>
-    <p style="color:#444;font-size:14px;line-height:1.6;">
-      Thank you for your interest in calming your nervous system.
-      Here is your free Nervous System Reset audio recording:
-    </p>
+    {body_paragraphs}
     <p style="text-align:center;margin:24px 0;">
-      <a href="{_site_url()}/resources/nervous-system-reset"
+      <a href="{download_url}"
          style="display:inline-block;background:{BRAND_COLOUR};color:#fff;
                 padding:12px 28px;border-radius:24px;text-decoration:none;
                 font-size:14px;font-weight:600;">
-        Download Your Recording
+        Download Your Resource
       </a>
     </p>
     <p style="color:#444;font-size:14px;line-height:1.6;">
@@ -154,9 +171,11 @@ def send_lead_magnet_delivery(entry):
     <p style="color:#444;font-size:14px;">Warm regards,<br />LiLy</p>
     """
 
+    subject = config.lead_magnet_email_subject or "Your free Nervous System Reset recording"
+
     _send_email(
         to_email=entry.email,
-        subject="Your free Nervous System Reset recording",
+        subject=subject,
         html_body=_wrap_html("Your free resource is ready", body),
     )
 

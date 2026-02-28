@@ -73,13 +73,13 @@ export default function Events() {
                         </span>
                         <span className="flex items-center gap-1.5">
                           <Clock className="w-4 h-4 text-primary" />
-                          {event.time}
+                          {event.start_time}
                         </span>
                         <span className="flex items-center gap-1.5">
                           <MapPin className="w-4 h-4 text-primary" />
                           {event.location}
                         </span>
-                        {event.spots_remaining > 0 && (
+                        {event.spots_remaining != null && event.spots_remaining > 0 && (
                           <span className="flex items-center gap-1.5">
                             <Users className="w-4 h-4 text-primary" />
                             {event.spots_remaining} spots remaining

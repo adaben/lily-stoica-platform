@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -10,6 +11,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import LeadMagnetForm from "@/components/LeadMagnetForm";
 import AIAssistant from "@/components/AIAssistant";
+import { apiGetPublicSettings, type PublicSettings } from "@/lib/api";
 import {
   AnimatedSection,
   StaggerContainer,
@@ -75,6 +77,12 @@ const testimonials = [
 
 export default function Index() {
   const showcase = useShowcase();
+  const [pubSettings, setPubSettings] = useState<PublicSettings | null>(null);
+
+  useEffect(() => {
+    apiGetPublicSettings().then(setPubSettings).catch(() => {});
+  }, []);
+
   /* When inside a Showcase iframe, initial={false} tells framer-motion to
      skip mount animation and render directly with the `animate` values. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -507,6 +515,7 @@ export default function Index() {
       </section>
 
       {/* Lead magnet */}
+      {pubSettings?.lead_magnet_enabled && (
       <section className="py-24 lg:py-32 bg-gradient-to-br from-primary/5 via-accent/20 to-lily-blush/20 relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-10 right-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl" />
@@ -545,19 +554,18 @@ export default function Index() {
                   <MessageCircle className="w-4 h-4 text-primary" />
                 </div>
                 <h3 className="text-lg font-cormorant font-bold text-foreground">
-                  Free Nervous System Reset Audio
+                  {pubSettings.lead_magnet_title || "Free Nervous System Reset Audio"}
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Leave your details and receive a guided relaxation recording
-                enhanced with binaural beats, designed for stress relief and
-                better sleep.
+                {pubSettings.lead_magnet_description || "Leave your details and receive a guided relaxation recording enhanced with binaural beats, designed for stress relief and better sleep."}
               </p>
-              <LeadMagnetForm />
+              <LeadMagnetForm buttonText={pubSettings.lead_magnet_button_text} />
             </div>
           </AnimatedSection>
         </div>
       </section>
+      )}
 
       {/* CTA */}
       <section className="relative py-20 bg-primary overflow-hidden">

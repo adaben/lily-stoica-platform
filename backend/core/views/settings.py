@@ -12,15 +12,19 @@ from ..permissions import IsAdmin
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def public_settings(request):
-    """Public feature flags (no auth required)."""
+    """Public feature flags + lead-magnet content (no auth required)."""
     config = SystemConfiguration.load()
-    return Response({
+    data = {
         "beta_mode": config.beta_mode,
         "blog_enabled": config.blog_enabled,
         "events_enabled": config.events_enabled,
         "booking_enabled": config.booking_enabled,
         "lead_magnet_enabled": config.lead_magnet_enabled,
-    })
+        "lead_magnet_title": config.lead_magnet_title,
+        "lead_magnet_description": config.lead_magnet_description,
+        "lead_magnet_button_text": config.lead_magnet_button_text,
+    }
+    return Response(data)
 
 
 @api_view(["GET"])

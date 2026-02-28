@@ -3,7 +3,11 @@ import { apiSubmitLeadMagnet } from "@/lib/api";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LeadMagnetForm() {
+interface LeadMagnetFormProps {
+  buttonText?: string;
+}
+
+export default function LeadMagnetForm({ buttonText }: LeadMagnetFormProps) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [consent, setConsent] = useState(false);
@@ -80,7 +84,7 @@ export default function LeadMagnetForm() {
         className="w-full py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
       >
         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-        Send Me the Recording
+        {buttonText || "Send Me the Recording"}
       </button>
     </form>
   );

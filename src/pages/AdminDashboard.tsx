@@ -5,7 +5,7 @@ import {
   Calendar, Settings, Loader2, Clock,
   Brain, Bell, FileText, CalendarDays,
   Plus, Pencil, Trash2, Eye, EyeOff, Pin, BookOpen, X,
-  Repeat, Video, FlaskConical,
+  Repeat, Video, FlaskConical, Gift, Upload,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -741,6 +741,17 @@ function SettingsPanel() {
   const [betaMode, setBetaMode] = useState(true);
   const [savingBeta, setSavingBeta] = useState(false);
 
+  /* lead magnet */
+  const [lmEnabled, setLmEnabled] = useState(false);
+  const [lmTitle, setLmTitle] = useState("");
+  const [lmDesc, setLmDesc] = useState("");
+  const [lmButtonText, setLmButtonText] = useState("");
+  const [lmEmailSubject, setLmEmailSubject] = useState("");
+  const [lmEmailBody, setLmEmailBody] = useState("");
+  const [lmFile, setLmFile] = useState<File | null>(null);
+  const [lmCurrentFile, setLmCurrentFile] = useState("");
+  const [savingLm, setSavingLm] = useState(false);
+
   const [loaded, setLoaded] = useState(false);
 
   /* sync server → local state once */
@@ -754,6 +765,13 @@ function SettingsPanel() {
     setAiSystemPrompt((settings.ai_system_prompt as string) ?? "");
     setAiMaxTokens((settings.ai_max_tokens as number) ?? 512);
     setBetaMode(settings.beta_mode as boolean ?? true);
+    setLmEnabled(settings.lead_magnet_enabled as boolean ?? false);
+    setLmTitle((settings.lead_magnet_title as string) ?? "");
+    setLmDesc((settings.lead_magnet_description as string) ?? "");
+    setLmButtonText((settings.lead_magnet_button_text as string) ?? "");
+    setLmEmailSubject((settings.lead_magnet_email_subject as string) ?? "");
+    setLmEmailBody((settings.lead_magnet_email_body as string) ?? "");
+    setLmCurrentFile((settings.lead_magnet_file as string) ?? "");
     setLoaded(true);
   }
 
@@ -847,6 +865,143 @@ function SettingsPanel() {
             Save
           </button>
         </div>
+      </div>
+
+      {/* ── Lead Magnet ── */}
+      <div className="bg-white rounded-2xl border border-border/60 p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Gift className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-cormorant font-bold text-foreground">Lead Magnet</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Free resource offered on the homepage in exchange for an email.
+          Configure the content, the file to deliver, and the email subscribers receive.
+        </p>
+
+        {/* Enable / disable toggle */}
+        <label className="flex items-center gap-3 mb-5 cursor-pointer select-none">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={lmEnabled}
+            onClick={() => setLmEnabled(!lmEnabled)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${lmEnabled ? "bg-primary" : "bg-gray-300"}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${lmEnabled ? "translate-x-5" : ""}`} />
+          </button>
+          <span className="text-sm font-medium text-foreground">
+            Lead magnet {lmEnabled ? <span className="text-green-700 font-semibold">(Visible)</span> : <span className="text-gray-500">(Hidden)</span>}
+          </span>
+        </label>
+
+        <div className="space-y-3">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Section title</label>
+            <input
+              type="text"
+              value={lmTitle}
+              onChange={(e) => setLmTitle(e.target.value)}
+              placeholder="Free Nervous System Reset Audio"
+              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
+            <textarea
+              value={lmDesc}
+              onChange={(e) => setLmDesc(e.target.value)}
+              rows={3}
+              placeholder="Leave your details and receive a guided relaxation recording..."
+              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+            />
+          </div>
+          {/* Button text */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Button text</label>
+            <input
+              type="text"
+              value={lmButtonText}
+              onChange={(e) => setLmButtonText(e.target.value)}
+              placeholder="Send Me the Recording"
+              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          {/* File upload */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">File to deliver</label>
+            {lmCurrentFile && (
+              <p className="text-xs text-muted-foreground mb-1.5">
+                Current: <span className="font-medium text-foreground">{lmCurrentFile.split("/").pop()}</span>
+              </p>
+            )}
+            <label className="flex items-center gap-2 cursor-pointer text-sm text-primary hover:underline">
+              <Upload className="w-4 h-4" />
+              {lmFile ? lmFile.name : "Choose file…"}
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => setLmFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <p className="text-[11px] text-muted-foreground mt-1">Audio, PDF, or any downloadable file. Sent to subscribers via email link.</p>
+          </div>
+
+          <hr className="border-border/50" />
+
+          {/* Email subject */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Email subject</label>
+            <input
+              type="text"
+              value={lmEmailSubject}
+              onChange={(e) => setLmEmailSubject(e.target.value)}
+              placeholder="Your free Nervous System Reset recording"
+              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          {/* Email body */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Email body</label>
+            <textarea
+              value={lmEmailBody}
+              onChange={(e) => setLmEmailBody(e.target.value)}
+              rows={4}
+              placeholder="Thank you for your interest…"
+              className="w-full px-4 py-2.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">The download link/button is added automatically after this text.</p>
+          </div>
+        </div>
+
+        <button
+          onClick={async () => {
+            setSavingLm(true);
+            try {
+              const fd = new FormData();
+              fd.append("lead_magnet_enabled", String(lmEnabled));
+              fd.append("lead_magnet_title", lmTitle);
+              fd.append("lead_magnet_description", lmDesc);
+              fd.append("lead_magnet_button_text", lmButtonText);
+              fd.append("lead_magnet_email_subject", lmEmailSubject);
+              fd.append("lead_magnet_email_body", lmEmailBody);
+              if (lmFile) fd.append("lead_magnet_file", lmFile);
+              await apiUpdateSettings(fd as unknown as Record<string, unknown>);
+              qc.invalidateQueries({ queryKey: ["admin-settings"] });
+              toast.success("Lead magnet settings saved.");
+            } catch {
+              toast.error("Could not save lead magnet settings.");
+            } finally {
+              setSavingLm(false);
+            }
+          }}
+          disabled={savingLm}
+          className="mt-4 w-full py-2.5 bg-primary text-primary-foreground font-medium rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {savingLm && <Loader2 className="w-4 h-4 animate-spin" />}
+          Save Lead Magnet Settings
+        </button>
       </div>
 
       {/* ── Email / Resend ── */}
@@ -1228,10 +1383,10 @@ function EventsPanel() {
   const openEdit = (ev: Event) => {
     setForm({
       title: ev.title, description: ev.description, date: ev.date,
-      start_time: ev.time || "", end_time: "",
-      location: ev.location, is_online: false,
+      start_time: ev.start_time || "", end_time: ev.end_time || "",
+      location: ev.location, is_online: ev.is_online,
       ticket_url: ev.ticket_url, price: String(ev.price),
-      max_spots: String(ev.capacity), is_published: ev.is_active,
+      max_spots: String(ev.max_spots), is_published: ev.is_published,
     });
     setEditId(ev.id);
     setShowForm(true);

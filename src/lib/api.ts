@@ -205,13 +205,17 @@ export interface Event {
   title: string;
   description: string;
   date: string;
-  time: string;
+  start_time: string;
+  end_time: string | null;
   location: string;
+  is_online: boolean;
   ticket_url: string;
-  capacity: number;
-  spots_remaining: number;
   price: string;
-  is_active: boolean;
+  max_spots: number;
+  spots_taken: number;
+  spots_remaining: number | null;
+  is_published: boolean;
+  created_at: string;
 }
 
 export interface LeadMagnetSubmission {
@@ -522,6 +526,9 @@ export interface PublicSettings {
   events_enabled: boolean;
   booking_enabled: boolean;
   lead_magnet_enabled: boolean;
+  lead_magnet_title: string;
+  lead_magnet_description: string;
+  lead_magnet_button_text: string;
 }
 
 export const apiGetPublicSettings = () =>
@@ -532,11 +539,13 @@ export const apiGetPublicSettings = () =>
 export const apiGetSettings = () =>
   apiFetch<Record<string, unknown>>("/settings/");
 
-export const apiUpdateSettings = (data: Record<string, unknown>) =>
-  apiFetch<Record<string, unknown>>("/settings/update/", {
+export const apiUpdateSettings = (data: Record<string, unknown> | FormData) => {
+  const isFormData = data instanceof FormData;
+  return apiFetch<Record<string, unknown>>("/settings/update/", {
     method: "PATCH",
-    body: JSON.stringify(data),
+    body: isFormData ? (data as unknown as BodyInit) : JSON.stringify(data),
   });
+};
 
 export const apiTestGemini = () =>
   apiFetch<{ message: string }>("/ai/test/", { method: "POST" });

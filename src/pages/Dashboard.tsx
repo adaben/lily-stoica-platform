@@ -89,7 +89,7 @@ export default function Dashboard() {
   const latestPosts: BlogPost[] = (blogData?.results || []).slice(0, 3);
   const latestResources: Resource[] = (resourcesData || []).slice(0, 4);
   const upcomingEvents: Event[] = (eventsData || [])
-    .filter((e: Event) => e.is_active && isAfter(new Date(e.date), new Date()))
+    .filter((e: Event) => e.is_published && isAfter(new Date(e.date), new Date()))
     .slice(0, 2);
 
   const handleCancel = async (id: number) => {
@@ -385,7 +385,7 @@ export default function Dashboard() {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-primary" />
-                      {evt.time}
+                      {evt.start_time}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
