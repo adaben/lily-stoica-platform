@@ -17,6 +17,17 @@ DEBUG = DJANGO_ENV == "dev"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+# Always include production domains so a missing .env doesn't cause 400s
+_PROD_HOSTS = [
+    "calm-lily.co.uk", "www.calm-lily.co.uk",
+    "lily.perennix.io",
+    "lilystoica.com", "www.lilystoica.com",
+    "localhost", "127.0.0.1",
+]
+for _h in _PROD_HOSTS:
+    if _h not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_h)
+
 # ---------------------------------------------------------------------------
 # Application definition
 # ---------------------------------------------------------------------------
@@ -157,10 +168,23 @@ CORS_ALLOWED_ORIGINS = os.getenv(
 ).split(",")
 CORS_ALLOW_CREDENTIALS = True
 
+# Always include production origins
+_PROD_ORIGINS = [
+    "https://calm-lily.co.uk", "https://www.calm-lily.co.uk",
+    "https://lily.perennix.io",
+    "https://lilystoica.com",
+]
+for _o in _PROD_ORIGINS:
+    if _o not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(_o)
+
 CSRF_TRUSTED_ORIGINS = os.getenv(
     "CSRF_TRUSTED_ORIGINS",
     "http://localhost:8081,http://127.0.0.1:8081"
 ).split(",")
+for _o in _PROD_ORIGINS:
+    if _o not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_o)
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8081")
 
