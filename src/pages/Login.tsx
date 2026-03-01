@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, Brain, Shield, User, AlertTriangle } from "lucide-react";
+import { Loader2, Shield, User, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { apiGetPublicSettings } from "@/lib/api";
@@ -64,10 +64,11 @@ export default function Login() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6">
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                <Brain className="w-5 h-5 text-primary" />
-              </div>
-              <span className="text-lg font-cormorant font-bold text-foreground">LiLy Stoica</span>
+              <img
+                src="/logo-transparent.png"
+                alt="Calm Lily"
+                className="h-12 w-auto object-contain"
+              />
             </Link>
             <h1 className="text-3xl font-cormorant font-bold text-foreground">Welcome Back</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to manage your sessions</p>

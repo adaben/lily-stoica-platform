@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, Brain } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -24,18 +24,12 @@ export default function SiteHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center group-hover:from-primary/25 group-hover:to-primary/10 transition-all shadow-sm">
-              <Brain className="w-5 h-5 text-primary" />
-            </div>
-            <div className="leading-tight">
-              <span className="block text-xl font-cormorant font-bold text-foreground tracking-wide">
-                Calm Lily
-              </span>
-              <span className="block text-[9px] font-inter text-muted-foreground uppercase tracking-[0.25em]">
-                by LiLy Stoica
-              </span>
-            </div>
+          <Link to="/" className="flex items-center gap-2 group">
+            <img
+              src="/logo-transparent.png"
+              alt="Calm Lily"
+              className="h-12 lg:h-14 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop nav */}

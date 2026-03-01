@@ -162,8 +162,8 @@ export default function Showcase() {
             {/* Decorative top flourish */}
             <div className="flex items-center justify-center gap-4 mb-8">
               <div className="w-20 h-px bg-white/20" />
-              <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg shadow-white/5">
-                <Brain className="w-10 h-10 text-white" />
+              <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-lg shadow-white/10">
+                <img src="/logo-transparent.png" alt="Calm Lily" className="h-16 w-auto object-contain" />
               </div>
               <div className="w-20 h-px bg-white/20" />
             </div>
@@ -469,8 +469,8 @@ export default function Showcase() {
           <div className="relative z-10 text-center max-w-3xl mx-auto px-8">
             <div className="flex items-center justify-center gap-4 mb-8">
               <div className="w-16 h-px bg-white/20" />
-              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/15">
-                <Brain className="w-8 h-8 text-white" />
+              <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-lg shadow-white/10">
+                <img src="/logo-transparent.png" alt="Calm Lily" className="h-14 w-auto object-contain" />
               </div>
               <div className="w-16 h-px bg-white/20" />
             </div>

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Brain, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 export default function SiteFooter() {
   return (
@@ -8,13 +8,13 @@ export default function SiteFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
-                <Brain className="w-4 h-4 text-primary" />
-              </div>
-              <div className="leading-tight">
-                <span className="text-lg font-cormorant font-bold text-white">Calm Lily</span>
-                <span className="block text-[9px] font-inter text-white/50 uppercase tracking-[0.25em]">by LiLy Stoica</span>
+            <div className="mb-4">
+              <div className="inline-block bg-white rounded-xl px-3 py-2">
+                <img
+                  src="/logo-transparent.png"
+                  alt="Calm Lily"
+                  className="h-10 w-auto object-contain"
+                />
               </div>
             </div>
             <p className="text-sm leading-relaxed text-white/60 mb-4">
